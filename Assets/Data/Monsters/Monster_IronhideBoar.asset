@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd5064c96cb5cf443a7816935eb6285a, type: 3}
+  m_Name: Monster_IronhideBoar
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.MonsterDataSO
+  speciesId: ironhide_boar
+  commonName: Ironhide Boar
+  defaultRegistration: 0
+  primaryElement: {fileID: 11400000, guid: 81dea1ab345a49c4fa6b1b2700fed4af, type: 2}
+  secondaryElement: {fileID: 0}
+  monsterIcon: {fileID: 0}
+  loreDescription: 
+  headModule: {fileID: 11400000, guid: 87c79d97c52b25544a0e346017f83ec0, type: 2}
+  chestModule: {fileID: 11400000, guid: 43b9313047bca4447927800f3464c772, type: 2}
+  leftArmModule: {fileID: 0}
+  rightArmModule: {fileID: 0}
+  legsModule: {fileID: 0}

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffd5445b0a8a7104d8ad07c29314c9c7, type: 3}
+  m_Name: Contract_TorrentWyrmBounty
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.GuildContractSO
+  contractId: bounty_torrent_wyrm
+  contractTitle: 'Wilderness Bounty: Torrent Wyrm'
+  clientName: Guildmaster Vane
+  description: A research institute requires a fresh, live Torrent Wyrm specimen from the quarantined wilderness clearing. Use Hydro pheromone bait [1] to lure it into a heavy wire snare [2].
+  targetSpecies: {fileID: 11400000, guid: 9ed6f1c7909783c41ad8b28f9337a3d1, type: 2}
+  requiredCount: 1
+  rewardCredits: 250
+  rewardSummary: 250 Credits + Outpost Guild Seal
+  dialogueBriefing: Greetings, trapper. The Institute needs a live Torrent Wyrm for hydro-conduction studies. Deploy your Hydro pheromones [1] near the pools and snare one alive [2]. Don't let it tear you apart.
+  dialogueInProgress: Still tracking? Remember to place the Hydro scent lure [1] to pull the Wyrm out into the open, then drop a heavy wire snare [2] right in its path. Subdue it [E] once it's tangled!
+  dialogueCompleted: Remarkable work, trapper! That specimen is pristine. Here's your 250 Credits as promised. The Guild respects clean, non-lethal work.

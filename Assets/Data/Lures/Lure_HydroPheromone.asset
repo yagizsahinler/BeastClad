@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c29eb5c227c76b48ab0bbe8463cb214, type: 3}
+  m_Name: Lure_HydroPheromone
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.LureDataSO
+  lureId: lure_hydro
+  lureName: Hydro Scent Lure
+  description: Distilled aquatic pheromones that attract aquatic and reptilian beasts like Torrent Wyrms.
+  targetedElement: {fileID: 11400000, guid: 816d8790f53a95b4a95c6190431cf4fc, type: 2}
+  attractionRadius: 12
+  duration: 25
+  lureSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  scentAuraColor: {r: 0.2, g: 0.75, b: 1, a: 0.35}

@@ -52,3 +52,9 @@ Welcome to this project. All AI agents, coding assistants, and automated tools w
 - Offload research, exploration, and parallel analysis to subagents
 - For complex problems, throw more compute at it via subagents
 - One task per subagent for focused execution
+
+### 8. Project-Specific Architecture (BeastClad)
+
+- **Component-Based & Data-Driven**: Strictly use Unity's ScriptableObjects for all monster data, stats, and elemental types. Avoid hardcoding values.
+- **The "Infuse" Mechanic**: Monsters in this game DO NOT fight independently on the field. They transform into the player's armor/weapons (e.g., Head=HP, Arms=Attack). All combat code must reflect this modular equipment/infuse system.
+- **Non-Linear 2D Sandbox**: The game is a top-down 2D RPG supporting multiple player paths (Arena Fighter, Adventurer, Illegal Black Market). Code should be highly modular so new systems can be integrated step-by-step without breaking the core loop.

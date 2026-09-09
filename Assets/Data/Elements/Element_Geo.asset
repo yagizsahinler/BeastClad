@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de69705447be27947b19fb4d2e8c2f4f, type: 3}
+  m_Name: Element_Geo
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.ElementalTypeSO
+  elementId: Geo
+  displayName: Geo (Earth)
+  elementColor: {r: 0.75, g: 0.55, b: 0.35, a: 1}
+  elementIcon: {fileID: 0}
+  description: Earth element. Imparts heavy poise, durable stone armor, and high knockback resistance.

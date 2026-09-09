@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f94779055be9a542bb83dfca4d662f5, type: 3}
+  m_Name: InfusePart_VoltMantis_RightArm
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.InfusePartSO
+  partName: Volt Scythe
+  targetSlot: 3
+  localCooldownDuration: 1.2
+  statModifiers:
+    bonusMaxHP: 0
+    bonusDefense: 0
+    bonusAttack: 14
+    bonusMoveSpeed: 0
+  activeSkill: {fileID: 11400000, guid: c589205f51a70c64f8ca76aa8e7cf189, type: 2}
+  visualOverlaySprite: {fileID: 0}

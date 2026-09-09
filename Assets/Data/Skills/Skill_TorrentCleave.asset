@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd24953f8c9ff984c827a9e9aacaf9f3, type: 3}
+  m_Name: Skill_TorrentCleave
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.SkillDefinitionSO
+  skillName: Torrent Cleave
+  description: 
+  element: {fileID: 11400000, guid: 816d8790f53a95b4a95c6190431cf4fc, type: 2}
+  baseDamage: 15
+  range: 1.8
+  hitboxDuration: 0.15
+  spawnsSurfaceHazard: 1
+  surfaceHazardPrefab: {fileID: 0}
+  hazardLifetime: 8
