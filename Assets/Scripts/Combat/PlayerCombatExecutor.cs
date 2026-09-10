@@ -96,6 +96,34 @@ namespace BeastClad.Combat
             col.radius = radius;
 
             float damage = (playerStats != null ? playerStats.Attack : 15f) + (module.activeSkill != null ? module.activeSkill.baseDamage : 10f);
+
+            // Check for Contraband / Overclock recoil
+            if (infuseManager != null)
+            {
+                var regStatus = infuseManager.GetSlotRegistration(module.targetSlot);
+                var instance = infuseManager.GetEquippedInstance(module.targetSlot);
+
+                if (regStatus == RegistrationStatus.Contraband || (instance != null && instance.stability < 100f))
+                {
+                    float overclockBonus = 15f;
+                    float recoilSelfDamage = 4f;
+
+                    if (instance != null && instance.stability <= 55f)
+                    {
+                        overclockBonus = 20f;
+                        recoilSelfDamage = 6f;
+                    }
+
+                    damage += overclockBonus;
+
+                    if (playerStats != null && recoilSelfDamage > 0f)
+                    {
+                        playerStats.TakeTrueDamage(recoilSelfDamage);
+                        Debug.LogWarning($"<color=#FF0044>[Bio-Recoil Backlash!]</color> Overclocked strike with <b>{module.targetSlot}</b> dealt <b>+{overclockBonus} Damage</b>, but inflicted <b>-{recoilSelfDamage} HP</b> bio-stress!");
+                    }
+                }
+            }
+
             var element = module.activeSkill != null ? module.activeSkill.element : null;
 
             var payload = new DamagePayload(

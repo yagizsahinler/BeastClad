@@ -137,11 +137,14 @@ namespace BeastClad.Arena
             currentState = ArenaBoutState.Victory;
             OnStateChanged?.Invoke(currentState);
 
-            // Lock player movement and combat upon victory
+            // Lock player movement and combat upon victory celebration
             var pCtrl = playerStats != null ? playerStats.GetComponent<PlayerController2D>() : null;
             var pInfuse = playerStats != null ? playerStats.GetComponent<PlayerInfuseManager>() : null;
             if (pCtrl != null) pCtrl.SetMovementLocked(true);
             if (pInfuse != null) pInfuse.SetCombatEnabled(false);
+
+            // Re-enable concourse movement after the victory fanfare so player can visit kiosks
+            Invoke(nameof(UnlockPostMatchMovement), 2.0f);
 
             // Award prize purse
             if (playerWallet != null)
@@ -158,6 +161,16 @@ namespace BeastClad.Arena
 
             Debug.Log($"<color=#FFD700>[Arena Victory!]</color> Player won the bout! Awarded <b>+{prizePurseCredits} Credits</b>. Promoted to: <b>{newRank}</b>.");
             OnMatchConcluded?.Invoke(true, prizePurseCredits, newRank);
+        }
+
+        private void UnlockPostMatchMovement()
+        {
+            var pCtrl = playerStats != null ? playerStats.GetComponent<PlayerController2D>() : null;
+            if (pCtrl != null)
+            {
+                pCtrl.SetMovementLocked(false);
+                Debug.Log("<color=#00FFAA>[Arena Concourse]</color> Movement unlocked. Player can freely explore and access kiosks.");
+            }
         }
 
         private void HandlePlayerDeath()

@@ -93,6 +93,23 @@ namespace BeastClad.Player
             }
         }
 
+        /// <summary>
+        /// Applies unmitigated true damage directly to health, bypassing defense armor.
+        /// Used for biological stress, recoil feedback, and internal toxicity.
+        /// </summary>
+        public void TakeTrueDamage(float damage)
+        {
+            if (CurrentHP <= 0f || damage <= 0f) return;
+
+            CurrentHP = Mathf.Clamp(CurrentHP - damage, 0f, MaxHP);
+            OnHealthChanged?.Invoke(CurrentHP, MaxHP);
+
+            if (CurrentHP <= 0f)
+            {
+                OnDeath?.Invoke();
+            }
+        }
+
         public void Heal(float amount)
         {
             CurrentHP = Mathf.Clamp(CurrentHP + amount, 0f, MaxHP);

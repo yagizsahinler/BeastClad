@@ -81,7 +81,8 @@ The world offers multiple divergent ways to survive:
 | :--- | :--- |
 | `Assets/Scenes/SampleScene.unity` | **Combat & Chemistry Sandbox:** Enclosed test arena with training dummies, pedestal equipment stations, and water/electric terraforming reactions. |
 | `Assets/Scenes/Adventurer_Wilderness.unity` | **Wilderness Clearing & Trapping:** $32 \times 24$ tilemap zone with roaming wild beasts, pheromone lures, wire snares, subdual captures, and Guildmaster Vane contract turn-in. |
-| `Assets/Scenes/Arena_Colosseum.unity` | **Colosseum Tournament Arena:** Sanctioned tournament ring featuring match countdown, gladiator opponent AI (*Valerius the Shock-Lancer*), division ladder progression, and prize purses. |
+| `Assets/Scenes/Arena_Colosseum.unity` | **Colosseum Tournament Arena:** Sanctioned tournament ring featuring match countdown, gladiator opponent AI (*Valerius the Shock-Lancer*), corporate starter pack kiosk, division ladder progression, and prize purses. |
+| `Assets/Scenes/Underground_BlackMarket.unity` | **The Underground Black Market:** Contraband district featuring Dr. Silas's illegal Ripperdoc augmentations (overclocked volatile beasts), Pitmaster Jax's unsanctioned pit match wagers, brawler combat, and municipal scanner checkpoints. |
 
 ---
 
@@ -91,10 +92,9 @@ Current milestone progress is tracked in detail in [`PROGRESS.md`](PROGRESS.md):
 
 - [x] **Phase 1: Core Loop Prototype** (Infuse Equipping, Cooldowns, GCD, Terraforming Reaction)
 - [x] **Phase 2: The Adventurer & Trapping Module** (Tilemap Wilderness, Scent Lures, Wire Snares, Live Capture, Guild Contracts)
-- [ ] **Phase 3: The Arena & Legal Progression**
-  - [x] Phase 3.1: Arena Tournament Loop & Gladiator Opponent AI
-  - [ ] Phase 3.2: Economy & Corporate "Starter Pack" Purchasing
-- [ ] **Phase 4: The Underground & Black Market** (State Registration, Scanners, Ripperdoc Vendors)
+- [x] **Phase 3: The Arena & Legal Progression** (Gladiator Tournament Loop, Division Ladder, Corporate Starter Pack Kiosks)
+- [x] **Phase 4: The Underground & Black Market** (State Registration Scanners, Ripperdoc Overclocks, Unsanctioned Pit Wagers)
+- [ ] **Phase 5: World Integration, Persistence & Roster Management** (District Transit Hub, JSON Save/Load System, Roster & Infuse UI)
 
 For the complete design philosophy, mechanical specifications, and world lore, see [`CORE_GDD.md`](CORE_GDD.md).
 

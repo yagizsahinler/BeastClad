@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd5064c96cb5cf443a7816935eb6285a, type: 3}
-  m_Name: Monster_TorrentWyrm
+  m_Name: Monster_HyperVolatileWyrm
   m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.MonsterDataSO
-  speciesId: torrent_wyrm
-  commonName: Torrent Wyrm
-  defaultRegistration: 1
+  speciesId: hyper_volatile_wyrm
+  commonName: 'Hyper-Volatile Torrent Wyrm [CONTRABAND]'
+  defaultRegistration: 2
   primaryElement: {fileID: 11400000, guid: 816d8790f53a95b4a95c6190431cf4fc, type: 2}
   secondaryElement: {fileID: 0}
   monsterIcon: {fileID: 0}
-  loreDescription: 
+  loreDescription: Unlicensed genetic chimera with pumped aqueous glands. Emits torrents of high-pressure liquid, but severely degrades the host's nervous system.
   headModule: {fileID: 11400000, guid: 691413f208da8c640bdc7b3f20faee0e, type: 2}
   chestModule: {fileID: 0}
   leftArmModule: {fileID: 11400000, guid: c56b08ae7e58b6c4db35133ab0ce1a4f, type: 2}

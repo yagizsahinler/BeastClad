@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47c77279b06d8b1488b575505883b505, type: 3}
+  m_Name: Pack_VoltaicStriker
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Data.CorporateStarterPackSO
+  packId: voltaic_striker_kit
+  packName: Aegis-Fauna Shock-Striker Kit
+  corporateBrand: Aegis-Fauna Biometrics Corp
+  certificationSerial: AFC-REG-9022
+  description: Rapid response electromagnetic specimen engineered for sanctioned colosseum skirmishes.
+  costCredits: 500
+  monsterSpecies: {fileID: 11400000, guid: b0ead420cab404044be1d17cd4265d9d, type: 2}
+  registrationStatus: 0
+  packIcon: {fileID: 0}

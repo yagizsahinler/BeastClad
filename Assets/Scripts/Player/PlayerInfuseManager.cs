@@ -26,6 +26,7 @@ namespace BeastClad.Player
         // Internal slot state
         private readonly Dictionary<EquipmentSlot, MonsterDataSO> equippedMonsters = new Dictionary<EquipmentSlot, MonsterDataSO>();
         private readonly Dictionary<EquipmentSlot, InfusePartSO> equippedModules = new Dictionary<EquipmentSlot, InfusePartSO>();
+        private readonly Dictionary<EquipmentSlot, MonsterInstance> equippedInstances = new Dictionary<EquipmentSlot, MonsterInstance>();
 
         // Components
         private PlayerStatsComponent playerStats;
@@ -76,6 +77,70 @@ namespace BeastClad.Player
             RecalculateAllStats();
         }
 
+        private void Update()
+        {
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            if (kb == null) return;
+
+            // Debug hotkeys for testing registration tiers
+            if (kb.digit8Key.wasPressedThisFrame)
+            {
+                EquipLegalTestLoadout();
+            }
+            else if (kb.digit9Key.wasPressedThisFrame)
+            {
+                EquipUnregisteredTestLoadout();
+            }
+            else if (kb.digit0Key.wasPressedThisFrame)
+            {
+                EquipContrabandTestLoadout();
+            }
+        }
+
+        public void EquipLegalTestLoadout()
+        {
+            if (initialHeadMonster != null) EquipMonster(EquipmentSlot.Head, initialHeadMonster, false);
+            if (initialChestMonster != null) EquipMonster(EquipmentSlot.Chest, initialChestMonster, false);
+            if (initialRightArmMonster != null) EquipMonster(EquipmentSlot.RightArm, initialRightArmMonster, false);
+            if (initialLegsMonster != null) EquipMonster(EquipmentSlot.Legs, initialLegsMonster, false);
+
+            if (initialLeftArmMonster != null)
+            {
+                var legalWyrm = new MonsterInstance(initialLeftArmMonster, RegistrationStatus.Legal)
+                {
+                    nickname = $"{initialLeftArmMonster.commonName} [AFC-CERT]"
+                };
+                EquipMonster(EquipmentSlot.LeftArm, legalWyrm, true);
+            }
+            Debug.Log("<color=#00FFAA>[Infuse Debug]</color> Switched to <b>ALL LEGAL</b> Corporate Loadout! (Keys: [8] Legal, [9] Wild Unregistered, [0] Contraband)");
+        }
+
+        public void EquipUnregisteredTestLoadout()
+        {
+            if (initialLeftArmMonster != null)
+            {
+                var wildWyrm = new MonsterInstance(initialLeftArmMonster, RegistrationStatus.Unregistered)
+                {
+                    nickname = $"Wild {initialLeftArmMonster.commonName}"
+                };
+                EquipMonster(EquipmentSlot.LeftArm, wildWyrm, true);
+            }
+            Debug.Log("<color=#FFAA00>[Infuse Debug]</color> Equipped <b>UNREGISTERED</b> Wild Beast into Left Arm! (Keys: [8] Legal, [9] Wild Unregistered, [0] Contraband)");
+        }
+
+        public void EquipContrabandTestLoadout()
+        {
+            if (initialRightArmMonster != null)
+            {
+                var contraband = new MonsterInstance(initialRightArmMonster, RegistrationStatus.Contraband)
+                {
+                    nickname = $"{initialRightArmMonster.commonName} [BLACK-MARKET OVERCLOCKED]"
+                };
+                EquipMonster(EquipmentSlot.RightArm, contraband, true);
+            }
+            Debug.Log("<color=#FF0044>[Infuse Debug]</color> Equipped <b>CONTRABAND</b> Overclocked Beast into Right Arm! (Keys: [8] Legal, [9] Wild Unregistered, [0] Contraband)");
+        }
+
         private void InitializeLoadout()
         {
             if (initialHeadMonster != null) EquipMonster(EquipmentSlot.Head, initialHeadMonster, true);
@@ -115,6 +180,7 @@ namespace BeastClad.Player
 
             equippedMonsters[slot] = monster;
             equippedModules[slot] = module;
+            equippedInstances.Remove(slot);
 
             if (notifyAndRecalculate)
             {
@@ -126,12 +192,32 @@ namespace BeastClad.Player
         }
 
         /// <summary>
+        /// Equips a specific runtime MonsterInstance (with its unique registration status) to a socket.
+        /// </summary>
+        public bool EquipMonster(EquipmentSlot slot, MonsterInstance instance, bool notifyAndRecalculate = true)
+        {
+            if (instance == null || instance.template == null)
+            {
+                UnequipMonster(slot);
+                return true;
+            }
+
+            bool success = EquipMonster(slot, instance.template, notifyAndRecalculate);
+            if (success)
+            {
+                equippedInstances[slot] = instance;
+            }
+            return success;
+        }
+
+        /// <summary>
         /// Removes any monster equipped to the specified socket.
         /// </summary>
         public void UnequipMonster(EquipmentSlot slot)
         {
             equippedMonsters.Remove(slot);
             equippedModules.Remove(slot);
+            equippedInstances.Remove(slot);
 
             RecalculateAllStats();
             OnInfuseChanged?.Invoke(slot, null, null);
@@ -140,6 +226,29 @@ namespace BeastClad.Player
         public MonsterDataSO GetEquippedMonster(EquipmentSlot slot)
         {
             return equippedMonsters.TryGetValue(slot, out var monster) ? monster : null;
+        }
+
+        public MonsterInstance GetEquippedInstance(EquipmentSlot slot)
+        {
+            return equippedInstances.TryGetValue(slot, out var instance) ? instance : null;
+        }
+
+        /// <summary>
+        /// Returns the municipal legal registration status of the monster in the specified slot.
+        /// </summary>
+        public RegistrationStatus GetSlotRegistration(EquipmentSlot slot)
+        {
+            if (equippedInstances.TryGetValue(slot, out var instance) && instance != null)
+            {
+                return instance.registrationStatus;
+            }
+
+            if (equippedMonsters.TryGetValue(slot, out var monster) && monster != null)
+            {
+                return monster.defaultRegistration;
+            }
+
+            return RegistrationStatus.Legal;
         }
 
         public InfusePartSO GetEquippedModule(EquipmentSlot slot)

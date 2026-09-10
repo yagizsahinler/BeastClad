@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 4756383055879792151}
   - component: {fileID: 7508122442971809202}
   - component: {fileID: 6133937862877121809}
+  - component: {fileID: 8934627850685854022}
+  - component: {fileID: 8755054080920480007}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -277,3 +279,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Combat.Hurtbox2D
   isInvulnerable: 0
+--- !u!114 &8934627850685854022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8664380684416709690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da11ad45ff1d957408b3271b0155c666, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Player.PlayerWallet
+  startingCredits: 0
+--- !u!114 &8755054080920480007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8664380684416709690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17d0f7067b79f44d86cbb01706c62c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Player.PlayerMonsterRoster
+  roster: []

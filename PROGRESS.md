@@ -11,8 +11,8 @@
 
 | Metric | Current State |
 | :--- | :--- |
-| **Active Phase** | **Phase 3: The Arena & Legal Progression** |
-| **Current Focus** | Phase 3.2: Economy & Corporate "Starter Pack" Purchasing |
+| **Active Phase** | **Phase 5: World Integration, Persistence & Roster UI (Ready to Start)** |
+| **Current Focus** | Phase 5 Backlog Elevation (Hub Transitions, Persistence, Roster UI) |
 | **Active Blockers** | None |
 | **Target Build Target** | PC Standalone / Unity Editor Test Arena |
 
@@ -79,24 +79,47 @@
   - [x] Create structured Arena Room with wave/bout state controller (`PreMatch`, `ActiveBout`, `Victory`, `Defeat`).
   - [x] Implement sanctioned opponent AI (human gladiator infused with corporate monster gear).
   - [x] Add basic match outcome triggers and division ladder rank increment.
-- [ ] **3.2 Economy & Corporate "Starter Pack" Purchasing**
-  - [ ] Implement simple currency counter (`Credits`).
-  - [ ] Build minimal kiosk/vendor UI to purchase pre-packaged corporate "Starter Pack" beasts.
-  - [ ] Implement automatic State Registration tag flag (`IsRegistered = true`) upon purchase.
+- [x] **3.2 Economy & Corporate "Starter Pack" Purchasing**
+  - [x] Implement simple currency counter (`Credits`).
+  - [x] Build minimal kiosk/vendor UI to purchase pre-packaged corporate "Starter Pack" beasts.
+  - [x] Implement automatic State Registration tag flag (`IsRegistered = true`) upon purchase.
 
 ---
 
 ### Phase 4: The Underground & Black Market
 *Goal: Implement state enforcement, unregistered contraband monsters, and high-risk underground systems.*
 
-- [ ] **4.1 State Registration & Scanner Logic**
-  - [ ] Attach `RegistrationStatus` (`Legal`, `Unregistered`, `Contraband`) to monster data/instances.
-  - [ ] Create Municipal Scanner trigger zone (detects unregistered monsters in player loadout).
-  - [ ] Implement Enforcer alert/heat reaction when illegal monsters are detected in civil zones.
-- [ ] **4.2 Underground Black Market & Ripperdoc**
-  - [ ] Build subterranean hub scene/room with illegal merchants.
-  - [ ] Create Ripperdoc vendor logic: Sell volatile unregistered beasts with overclocked stats (+Attack, but self-damage or instability).
-  - [ ] Implement basic underground wager/betting interaction before unsanctioned pit matches.
+- [x] **4.1 State Registration & Scanner Logic**
+  - [x] Attach `RegistrationStatus` (`Legal`, `Unregistered`, `Contraband`) to monster data/instances.
+  - [x] Create Municipal Scanner trigger zone (detects unregistered monsters in player loadout).
+  - [x] Implement Enforcer alert/heat reaction when illegal monsters are detected in civil zones.
+- [x] **4.2 Underground Black Market & Ripperdoc**
+  - [x] Build subterranean hub scene/room with illegal merchants (`Underground_BlackMarket.unity`).
+  - [x] Create Ripperdoc vendor logic: Sell volatile unregistered beasts with overclocked stats (+Attack, but self-damage or instability).
+  - [x] Implement basic underground wager/betting interaction before unsanctioned pit matches (100/250/500 CR, 2.5x payout).
+
+---
+
+### Phase 5: World Integration, Persistence & Roster Management
+*Goal: Connect the three independent gameplay paths into a cohesive sandbox world loop, implement session persistence across scenes, and build a full in-game roster and modular infuse UI.*
+
+- [ ] **5.1 Unified Overworld Hub & Scene Transition System**
+  - [ ] Build a central District Transit Hub connecting the 3 gameplay sectors (`Adventurer_Wilderness`, `Arena_Colosseum`, `Underground_BlackMarket`).
+  - [ ] Implement robust 2D Scene Transition triggers with target spawn point positioning and transition fade/loading overlay.
+  - [ ] Preserve player character data, equipped modules, and wallet credits across scene changes without state desync.
+  - [ ] Integrate municipal security checkpoint scanner gates at entrances between illegal/wild zones and civil/arena districts.
+
+- [ ] **5.2 Persistent Save & Load System (JSON)**
+  - [ ] Design robust, serializable Save Data contracts (`PlayerSaveData`: Credits, Roster Monsters, Equipped Slots, Arena Rank, Story Flags).
+  - [ ] Implement atomic file I/O `SaveManager` service writing to `Application.persistentDataPath/savegame.json`.
+  - [ ] Implement auto-save triggers on scene transitions, kiosk purchases, capture events, and match conclusions.
+  - [ ] Provide load-game initialization on startup with graceful fallback to fresh defaults if no save file is detected.
+
+- [ ] **5.3 Dedicated Roster & Infuse Management UI**
+  - [ ] Build full-screen / modal Roster & Infuse management window toggled via `[Tab]` or `[I]`.
+  - [ ] Display captured/purchased monster inventory cards with registration status tags (`Legal`, `Unregistered`, `Contraband`), stability meters, and stat deltas.
+  - [ ] Implement drag-and-drop or click-to-equip assignment into the 5 anatomical sockets (Head, Chest, Left Arm, Right Arm, Legs).
+  - [ ] Connect equip actions to `PlayerInfuseManager` with real-time stat recalculations and HUD radial cooldown refresh.
 
 ---
 
@@ -104,18 +127,16 @@
 
 | ID | Phase | Description | Status | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| *None logged yet* | — | Project in initialization phase. | Open | Log new bugs here with reproduction steps. |
+| *None logged yet* | — | All reported underground issues resolved and verified. | Resolved | Fixed collider scales, brawler radius, HUD canvas, and hub combat gating. |
 
 ---
 
 ## Backlog (Deferred for Scope Management)
 
-*These features are strictly parked to prevent scope creep until Phase 1–4 are fully functional and verified.*
+*These features are strictly parked to prevent scope creep until Phase 1–5 are fully functional and verified.*
 
-- [ ] Full grid-based or weight-based Inventory System UI.
-- [ ] Persistent JSON/Binary Save & Load system.
 - [ ] Genetic splicing / Cross-breed monster fusion crafting.
-- [ ] Multi-district sprawling open sandbox world.
+- [ ] Multi-district sprawling open sandbox world (procedural generation or additional biomes).
 - [ ] Complex dialogue trees and branching narrative cutscenes.
 - [ ] Online leaderboards or multiplayer arena duels.
 - [ ] Advanced dynamic lighting normal maps and post-processing polish passes.

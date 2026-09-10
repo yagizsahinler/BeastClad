@@ -139,6 +139,11 @@ namespace BeastClad.Trapping
                         if (captured != null)
                         {
                             CapturedMonsters.Add(captured);
+                            var roster = GetComponent<Player.PlayerMonsterRoster>();
+                            if (roster != null)
+                            {
+                                roster.AddMonster(captured);
+                            }
                             OnMonsterCaptured?.Invoke(captured);
                             Debug.Log($"<color=#00FFCC>[Trapper Vault]</color> Total specimens in transport crate: <b>{CapturedMonsters.Count}</b>.");
                             return true;
