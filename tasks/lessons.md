@@ -49,3 +49,12 @@
 - **Issue:** `PlayerInfuseManager` defaults to `isCombatEnabled = true`, allowing combat inputs to fire inside non-combat civilian hubs, markets, and staging areas. Additionally, returning from a match improperly re-enabled combat before the player left the hub.
 - **Pattern:** Scene controllers managing peaceful hubs must explicitly disable combat on `Start()` (`pInfuse.SetCombatEnabled(false)`). Bout/match controllers must gate combat strictly to `ActiveBout`, keeping it disabled during match countdowns and immediately upon bout conclusion (`Defeated`, `Victory`, and `ReturnToHub`).
 
+## 13. SerializedProperty Name Alignment & Null-Safe Property Binding
+- **Issue:** Calling `so.FindProperty("fieldName").objectReferenceValue = ...` throws `NullReferenceException` at edit-time if the string does not exactly match the private backing field name on the target component (e.g. `bannerRoot` vs `scannerBanner`).
+- **Pattern:** Always inspect the target class's `[SerializeField]` declaration before referencing property names in builder scripts. Use defensive null-check guards (`var prop = so.FindProperty("name"); if (prop != null) prop.objectReferenceValue = ...;`) to ensure editor builders remain crash-proof even if field names evolve.
+
+## 14. Prefab Asset Tagging & Editor Script Recompilation
+- **Issue:** Instantiating prefabs in editor builder scripts (`PrefabUtility.InstantiatePrefab(prefab)`) retains the root tag of the underlying asset. If the prefab asset is `Untagged`, `GameObject.FindWithTag("Player")` fails even if the scene instance was renamed to `Player`. Additionally, modifying an editor script file requires triggering `refresh_unity` before executing `execute_code` that calls the builder methods, otherwise Unity executes stale in-memory code.
+- **Pattern:** Always configure and save tags directly on the source prefab asset (`playerPrefab.tag = "Player"`), and always invoke `refresh_unity` immediately after modifying C# script files before executing their methods in-editor.
+
+

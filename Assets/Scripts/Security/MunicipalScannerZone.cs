@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using BeastClad.Data;
 using BeastClad.Player;
 
@@ -46,6 +47,9 @@ namespace BeastClad.Security
         [SerializeField] private string checkpointName = "Municipal Security Gate 04";
         [SerializeField] private string sectorName = "Arena Civil Sector";
 
+        [Header("Quarantine Locker Integration")]
+        [SerializeField] private MunicipalQuarantineLocker quarantineLocker;
+
         [Header("Visual Indicators")]
         [SerializeField] private SpriteRenderer beamRenderer;
         [SerializeField] private SpriteRenderer statusLight;
@@ -61,15 +65,21 @@ namespace BeastClad.Security
 
         private Coroutine pulseRoutine;
         private Coroutine resetRoutine;
+        private bool isPlayerInside = false;
+        private GameObject cachedPlayer;
+        private ScanReport lastScanReport;
 
         public string CheckpointName => checkpointName;
         public string SectorName => sectorName;
         public MunicipalEnforcerAI2D StationedEnforcer => stationedEnforcer;
+        public MunicipalQuarantineLocker QuarantineLocker => quarantineLocker;
+        public ScanReport LastScanReport => lastScanReport;
 
         // Static Events for decoupled HUD / Audio
         public static event Action<MunicipalScannerZone, ScanReport> OnScanCleared;
         public static event Action<MunicipalScannerZone, ScanReport> OnScanViolation;
         public static event Action<MunicipalScannerZone> OnScannerExited;
+        public static event Action<MunicipalScannerZone, bool, string> OnScannerPromptChanged;
 
         private void Awake()
         {
@@ -83,10 +93,56 @@ namespace BeastClad.Security
             SetStatusLightColor(new Color(0.95f, 0.75f, 0.1f, 1f));
         }
 
+        private void Update()
+        {
+            if (!isPlayerInside) return;
+
+            var kb = Keyboard.current;
+            if (kb == null) return;
+
+            if (lastScanReport != null && !lastScanReport.IsClear && kb.eKey.wasPressedThisFrame)
+            {
+                PerformQuickDisarm();
+            }
+        }
+
+        public void PerformQuickDisarm()
+        {
+            if (quarantineLocker == null) quarantineLocker = FindAnyObjectByType<MunicipalQuarantineLocker>();
+
+            var infuse = cachedPlayer != null ? cachedPlayer.GetComponent<PlayerInfuseManager>() : FindAnyObjectByType<PlayerInfuseManager>();
+            var roster = cachedPlayer != null ? cachedPlayer.GetComponent<PlayerMonsterRoster>() : FindAnyObjectByType<PlayerMonsterRoster>();
+
+            if (quarantineLocker != null)
+            {
+                int count = quarantineLocker.DepositAllIllegalItems(infuse, roster);
+                Debug.Log($"<color=#00FFAA>[Municipal Scanner]</color> Quick-Disarm activated: {count} illegal specimens vaulted!");
+                OnScannerPromptChanged?.Invoke(this, true, $"<color=#00FFAA>✔ QUICK-DISARM: {count} illegal items vaulted. Scanners cleared!</color>");
+            }
+            else
+            {
+                if (infuse != null)
+                {
+                    foreach (EquipmentSlot slot in Enum.GetValues(typeof(EquipmentSlot)))
+                    {
+                        if (infuse.GetSlotRegistration(slot) != RegistrationStatus.Legal)
+                        {
+                            infuse.UnequipMonster(slot);
+                        }
+                    }
+                    infuse.RecalculateAllStats();
+                }
+                PerformScan(infuse, roster);
+                OnScannerPromptChanged?.Invoke(this, true, "<color=#00FFAA>✔ QUICK-DISARM: Illegal modules unequipped. Scanners cleared!</color>");
+            }
+        }
+
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Player") || other.GetComponent<PlayerController2D>() != null)
             {
+                isPlayerInside = true;
+                cachedPlayer = other.gameObject;
                 var infuse = other.GetComponent<PlayerInfuseManager>();
                 var roster = other.GetComponent<PlayerMonsterRoster>();
                 PerformScan(infuse, roster);
@@ -97,6 +153,9 @@ namespace BeastClad.Security
         {
             if (other.CompareTag("Player") || other.GetComponent<PlayerController2D>() != null)
             {
+                isPlayerInside = false;
+                cachedPlayer = null;
+                OnScannerPromptChanged?.Invoke(this, false, string.Empty);
                 OnScannerExited?.Invoke(this);
                 if (resetRoutine != null) StopCoroutine(resetRoutine);
                 resetRoutine = StartCoroutine(ResetAfterDelayRoutine(1.8f));
@@ -173,6 +232,7 @@ namespace BeastClad.Security
 
         private void HandleCleared(ScanReport report)
         {
+            lastScanReport = report;
             if (pulseRoutine != null) StopCoroutine(pulseRoutine);
 
             SetBeamColor(clearedColor);
@@ -180,6 +240,11 @@ namespace BeastClad.Security
 
             Debug.Log($"<color=#00FFAA>[Municipal Scanner: {checkpointName}]</color> <b>✔ CLEARED!</b> All {report.legalCount} biometrics legal. Access granted to {sectorName}.");
             OnScanCleared?.Invoke(this, report);
+
+            if (isPlayerInside)
+            {
+                OnScannerPromptChanged?.Invoke(this, true, "<color=#00FFAA>✔ BIOMETRICS VERIFIED — ACCESS AUTHORIZED</color>");
+            }
 
             if (stationedEnforcer != null)
             {
@@ -189,6 +254,7 @@ namespace BeastClad.Security
 
         private void HandleViolation(ScanReport report)
         {
+            lastScanReport = report;
             if (pulseRoutine != null) StopCoroutine(pulseRoutine);
             pulseRoutine = StartCoroutine(PulseBeamRoutine(violationColor));
 
@@ -198,6 +264,11 @@ namespace BeastClad.Security
                              $"Unregistered: {report.unregisteredCount}, Contraband: {report.contrabandCount}. Breach logged!");
 
             OnScanViolation?.Invoke(this, report);
+
+            if (isPlayerInside)
+            {
+                OnScannerPromptChanged?.Invoke(this, true, "<color=#FF3344>⚠ VIOLATION DETECTED! [ E ] Quick-Disarm & Stash Contraband</color>");
+            }
 
             if (stationedEnforcer != null)
             {

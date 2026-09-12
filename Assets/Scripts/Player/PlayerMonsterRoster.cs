@@ -53,6 +53,11 @@ namespace BeastClad.Player
             return removed;
         }
 
+        public void ClearRoster()
+        {
+            roster.Clear();
+        }
+
         /// <summary>
         /// Checks if the roster contains any specimen matching the given species template.
         /// </summary>

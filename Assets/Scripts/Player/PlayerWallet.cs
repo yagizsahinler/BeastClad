@@ -22,6 +22,12 @@ namespace BeastClad.Player
             Credits = startingCredits;
         }
 
+        public void SetCredits(int amount)
+        {
+            Credits = Mathf.Max(0, amount);
+            OnCreditsChanged?.Invoke(Credits);
+        }
+
         public void AddCredits(int amount)
         {
             if (amount <= 0) return;

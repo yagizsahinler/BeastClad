@@ -11,8 +11,8 @@
 
 | Metric | Current State |
 | :--- | :--- |
-| **Active Phase** | **Phase 5: World Integration, Persistence & Roster UI (Ready to Start)** |
-| **Current Focus** | Phase 5 Backlog Elevation (Hub Transitions, Persistence, Roster UI) |
+| **Active Phase** | **Phase 5: World Integration, Persistence & Roster Management** |
+| **Current Focus** | Completed Phase 5.1 (Ready for Phase 5.2: Save & Load System) |
 | **Active Blockers** | None |
 | **Target Build Target** | PC Standalone / Unity Editor Test Arena |
 
@@ -103,11 +103,12 @@
 ### Phase 5: World Integration, Persistence & Roster Management
 *Goal: Connect the three independent gameplay paths into a cohesive sandbox world loop, implement session persistence across scenes, and build a full in-game roster and modular infuse UI.*
 
-- [ ] **5.1 Unified Overworld Hub & Scene Transition System**
-  - [ ] Build a central District Transit Hub connecting the 3 gameplay sectors (`Adventurer_Wilderness`, `Arena_Colosseum`, `Underground_BlackMarket`).
-  - [ ] Implement robust 2D Scene Transition triggers with target spawn point positioning and transition fade/loading overlay.
-  - [ ] Preserve player character data, equipped modules, and wallet credits across scene changes without state desync.
-  - [ ] Integrate municipal security checkpoint scanner gates at entrances between illegal/wild zones and civil/arena districts.
+- [x] **5.1 Unified Overworld Hub & Scene Transition System**
+  - [x] Build a central District Transit Hub connecting the 3 gameplay sectors (`Adventurer_Wilderness`, `Arena_Colosseum`, `Underground_BlackMarket`).
+  - [x] Implement robust 2D Scene Transition triggers with target spawn point positioning and transition fade/loading overlay.
+  - [x] Preserve player character data, equipped modules, and wallet credits across scene changes without state desync.
+  - [x] Integrate municipal security checkpoint scanner gates at entrances between illegal/wild zones and civil/arena districts.
+  - [x] Implement Municipal Security Quarantine Locker and Quick-Disarm (`[E]` / `[F]`) at checkpoint to safely unequip and vault contraband before entering tournament arena.
 
 - [ ] **5.2 Persistent Save & Load System (JSON)**
   - [ ] Design robust, serializable Save Data contracts (`PlayerSaveData`: Credits, Roster Monsters, Equipped Slots, Arena Rank, Story Flags).

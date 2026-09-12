@@ -152,6 +152,40 @@ namespace BeastClad.Editor
                 "SECTOR 0: UNDERCITY", new Color(0.2f, 0.9f, 1f, 1f),
                 "⬅ DR. SILAS (CLINIC)   |   THE GUTTER PIT (ARENA) ➡", new Color(1f, 0.85f, 0.2f, 1f));
 
+            // South Exit Gate back to Central District
+            var exitRoot = new GameObject("Exit_ToCentralHub");
+            exitRoot.transform.SetParent(envRoot.transform);
+            exitRoot.transform.position = new Vector3(0f, -7.2f, 0f);
+
+            CreateSpriteObject(exitRoot.transform, "ExitStairwellPad", uisprite,
+                Vector3.zero, new Vector2(4.2f, 2.4f),
+                new Color(0.20f, 0.24f, 0.32f, 1f), -9);
+
+            CreateWorldSign(exitRoot.transform, "Sign_ExitHub", new Vector3(0f, 0.6f, 0f),
+                "⬆ STAIRS TO CENTRAL METRO DISTRICT", new Color(0.25f, 0.9f, 1f, 1f),
+                "[ F ] Ascend to Central Concourse", new Color(0.9f, 0.9f, 0.95f, 1f));
+
+            var exitCol = exitRoot.AddComponent<BoxCollider2D>();
+            exitCol.isTrigger = true;
+            exitCol.size = new Vector2(3.6f, 2.0f);
+
+            var exitTrig = exitRoot.AddComponent<SceneTransitionTrigger>();
+            var etSO = new SerializedObject(exitTrig);
+            etSO.FindProperty("targetSceneName").stringValue = "District_CentralHub";
+            etSO.FindProperty("targetSpawnTag").stringValue = "Spawn_FromUnderground";
+            etSO.FindProperty("mode").enumValueIndex = (int)TransitionTriggerMode.InteractPrompt;
+            etSO.FindProperty("promptText").stringValue = "[ F ] Climb Stairs to Central Metro District";
+            etSO.ApplyModifiedProperties();
+
+            var spawnFromHub = new GameObject("Spawn_FromHub");
+            spawnFromHub.transform.SetParent(envRoot.transform);
+            spawnFromHub.transform.position = new Vector3(0f, -5.5f, 0f);
+            var spHub = spawnFromHub.AddComponent<SceneSpawnPoint>();
+            var spHubSO = new SerializedObject(spHub);
+            spHubSO.FindProperty("spawnTag").stringValue = "Spawn_FromHub";
+            spHubSO.FindProperty("defaultFacing").vector2Value = Vector2.up;
+            spHubSO.ApplyModifiedProperties();
+
             // ==========================================
             // 4. BOUNDS & SOLID VISIBLE WALLS
             // ==========================================
@@ -502,6 +536,9 @@ namespace BeastClad.Editor
             // Pit Match Wager UI
             BuildPitMatchWagerUI(canvasObj.transform, wagerCtrl, defaultFont, uisprite, bgSprite);
 
+            // Scene Transition Prompt UI (Bottom-Center Banner)
+            BuildSceneTransitionPromptHUD(canvasObj.transform, defaultFont, uisprite);
+
             // ==========================================
             // 10. SAVE SCENE
             // ==========================================
@@ -739,6 +776,45 @@ namespace BeastClad.Editor
             var wso = new SerializedObject(walletUI);
             wso.FindProperty("creditsText").objectReferenceValue = txt;
             wso.ApplyModifiedProperties();
+        }
+
+        private static void BuildSceneTransitionPromptHUD(Transform canvasTransform, Font font, Sprite uisprite)
+        {
+            var promptRoot = new GameObject("SceneTransitionPromptHUD");
+            promptRoot.transform.SetParent(canvasTransform, false);
+            var rt = promptRoot.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0f);
+            rt.anchorMax = new Vector2(0.5f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.anchoredPosition = new Vector2(0f, 160f);
+            rt.sizeDelta = new Vector2(620f, 50f);
+
+            var bgImg = promptRoot.AddComponent<Image>();
+            bgImg.sprite = uisprite;
+            bgImg.color = new Color(0.05f, 0.08f, 0.14f, 0.95f);
+            bgImg.raycastTarget = false;
+
+            var textObj = new GameObject("PromptText");
+            textObj.transform.SetParent(promptRoot.transform, false);
+            var trt = textObj.AddComponent<RectTransform>();
+            trt.anchorMin = Vector2.zero;
+            trt.anchorMax = Vector2.one;
+            trt.sizeDelta = Vector2.zero;
+
+            var txt = textObj.AddComponent<Text>();
+            txt.font = font;
+            txt.fontSize = 20;
+            txt.fontStyle = FontStyle.Bold;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.color = new Color(0.2f, 0.95f, 1f, 1f);
+            txt.text = "[ F ] Climb Stairs to Central Metro District";
+            txt.raycastTarget = false;
+
+            var promptUI = promptRoot.AddComponent<SceneTransitionPromptUI>();
+            var pso = new SerializedObject(promptUI);
+            pso.FindProperty("promptPanel").objectReferenceValue = promptRoot;
+            pso.FindProperty("promptText").objectReferenceValue = txt;
+            pso.ApplyModifiedProperties();
         }
 
         private static void BuildRipperdocUI(Transform canvasTransform, Font font, Sprite uisprite, Sprite bgSprite)
