@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using BeastClad.Data;
 using BeastClad.Player;
@@ -25,6 +26,7 @@ namespace BeastClad.Editor
             Sprite knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             Sprite bgSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
             Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            VolumeProfile volumeProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>("Assets/Settings/DefaultVolumeProfile.asset");
 
             // ==========================================
             // 1. CAMERA & SMOOTH FOLLOW
@@ -39,8 +41,19 @@ namespace BeastClad.Editor
             cam.backgroundColor = new Color(0.07f, 0.08f, 0.12f, 1f); // Dark metropolitan navy
             camObj.AddComponent<AudioListener>();
 
+            var uacd = camObj.AddComponent<UniversalAdditionalCameraData>();
+            uacd.renderPostProcessing = true;
+
             var camFollow = camObj.AddComponent<CameraFollow2D>();
             camFollow.SetBounds(new Vector2(-12.0f, -8.0f), new Vector2(12.0f, 8.0f));
+
+            if (volumeProfile != null)
+            {
+                var volObj = new GameObject("Global Volume");
+                var vol = volObj.AddComponent<Volume>();
+                vol.isGlobal = true;
+                vol.profile = volumeProfile;
+            }
 
             // ==========================================
             // 2. 2D LIGHTING (URP 2D)
@@ -62,6 +75,12 @@ namespace BeastClad.Editor
 
             // South-East Undercity Hazard Crimson (Duct Access)
             CreatePointLight("Light_SouthUndercityDuct", new Vector3(8.5f, -6.5f, 0f), new Color(1f, 0.2f, 0.35f, 1f), 2.5f, 8.5f, 2.2f);
+
+            // Streetlamp Bollard Lights
+            CreatePointLight("Light_Bollard_N1", new Vector3(-2.6f, 3.5f, 0f), new Color(1f, 0.85f, 0.3f, 1f), 1.0f, 4.5f, 1.4f);
+            CreatePointLight("Light_Bollard_N2", new Vector3(2.6f, 3.5f, 0f), new Color(1f, 0.85f, 0.3f, 1f), 1.0f, 4.5f, 1.4f);
+            CreatePointLight("Light_Bollard_W1", new Vector3(-7.0f, 2.5f, 0f), new Color(0.2f, 0.95f, 0.5f, 1f), 1.0f, 4.5f, 1.4f);
+            CreatePointLight("Light_Bollard_W2", new Vector3(-7.0f, -2.5f, 0f), new Color(0.2f, 0.95f, 0.5f, 1f), 1.0f, 4.5f, 1.4f);
 
             // ==========================================
             // 3. ENVIRONMENT & GEOMETRY
@@ -125,6 +144,23 @@ namespace BeastClad.Editor
             CreateWorldSign(envRoot.transform, "Sign_MetroDirectory", new Vector3(0f, -0.6f, 0f),
                 "AETHELGARD METRO TRANSIT // CENTRAL CONCOURSE", new Color(0.25f, 0.9f, 1f, 1f),
                 "⬅ THE OUTLANDS (WILDERNESS)   |   ⬆ GRAND COLOSSEUM (CIVIL)   |   ⬇ SECTOR 0: UNDERCITY ➡", new Color(1f, 0.85f, 0.2f, 1f));
+
+            // Concourse Streetlamp Bollards
+            CreateStreetlampBollard(envRoot.transform, "Bollard_N1", new Vector3(-2.6f, 3.5f, 0f), uisprite, knob, new Color(1f, 0.85f, 0.2f, 1f));
+            CreateStreetlampBollard(envRoot.transform, "Bollard_N2", new Vector3(2.6f, 3.5f, 0f), uisprite, knob, new Color(1f, 0.85f, 0.2f, 1f));
+            CreateStreetlampBollard(envRoot.transform, "Bollard_W1", new Vector3(-7.0f, 2.4f, 0f), uisprite, knob, new Color(0.1f, 0.95f, 0.45f, 1f));
+            CreateStreetlampBollard(envRoot.transform, "Bollard_W2", new Vector3(-7.0f, -2.4f, 0f), uisprite, knob, new Color(0.1f, 0.95f, 0.45f, 1f));
+
+            // Concourse Rest Benches
+            CreateSpriteObject(envRoot.transform, "Bench_NW", uisprite,
+                new Vector3(-5.5f, 4.5f, 0f), new Vector2(2.4f, 0.8f),
+                new Color(0.22f, 0.26f, 0.35f, 1f), 2);
+            CreateSpriteObject(envRoot.transform, "Bench_SW", uisprite,
+                new Vector3(-5.5f, -4.5f, 0f), new Vector2(2.4f, 0.8f),
+                new Color(0.22f, 0.26f, 0.35f, 1f), 2);
+            CreateSpriteObject(envRoot.transform, "Bench_NE", uisprite,
+                new Vector3(5.5f, 4.5f, 0f), new Vector2(2.4f, 0.8f),
+                new Color(0.22f, 0.26f, 0.35f, 1f), 2);
 
             // Perimeter Solid Boundary Walls
             var boundsObj = new GameObject("DistrictBounds");
@@ -232,8 +268,8 @@ namespace BeastClad.Editor
             lockerLabelObj.transform.localPosition = new Vector3(0f, 2.0f, 0f);
             var lockerTm = lockerLabelObj.AddComponent<TextMesh>();
             lockerTm.text = "QUARANTINE LOCKER\n[SECURE • READY]";
-            lockerTm.fontSize = 20;
-            lockerTm.characterSize = 0.045f;
+            lockerTm.fontSize = 44;
+            lockerTm.characterSize = 0.07f;
             lockerTm.alignment = TextAlignment.Center;
             lockerTm.anchor = TextAnchor.MiddleCenter;
             lockerTm.color = new Color(0.1f, 0.85f, 1f, 1f);
@@ -556,8 +592,8 @@ namespace BeastClad.Editor
 
             var tm = signObj.AddComponent<TextMesh>();
             tm.text = mainText;
-            tm.fontSize = 28;
-            tm.characterSize = 0.055f;
+            tm.fontSize = 48;
+            tm.characterSize = 0.08f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.color = mainColor;
@@ -570,12 +606,12 @@ namespace BeastClad.Editor
             {
                 var subObj = new GameObject(name + "_Sub");
                 subObj.transform.SetParent(signObj.transform, false);
-                subObj.transform.localPosition = new Vector3(0f, -0.35f, 0f);
+                subObj.transform.localPosition = new Vector3(0f, -0.48f, 0f);
 
                 var stm = subObj.AddComponent<TextMesh>();
                 stm.text = subText;
-                stm.fontSize = 20;
-                stm.characterSize = 0.045f;
+                stm.fontSize = 36;
+                stm.characterSize = 0.06f;
                 stm.anchor = TextAnchor.MiddleCenter;
                 stm.alignment = TextAlignment.Center;
                 stm.color = subColor ?? Color.white;
@@ -594,12 +630,12 @@ namespace BeastClad.Editor
             rt.anchorMin = new Vector2(1f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
-            rt.anchoredPosition = new Vector2(-25f, -25f);
-            rt.sizeDelta = new Vector2(240f, 50f);
+            rt.anchoredPosition = new Vector2(-30f, -30f);
+            rt.sizeDelta = new Vector2(280f, 60f);
 
             var bgImg = walletRoot.AddComponent<Image>();
             bgImg.sprite = uisprite;
-            bgImg.color = new Color(0.08f, 0.10f, 0.14f, 0.92f);
+            bgImg.color = new Color(0.08f, 0.10f, 0.14f, 0.94f);
             bgImg.raycastTarget = false;
 
             var textObj = new GameObject("WalletText");
@@ -611,12 +647,17 @@ namespace BeastClad.Editor
 
             var txt = textObj.AddComponent<Text>();
             txt.font = font;
-            txt.fontSize = 20;
+            txt.fontSize = 26;
             txt.fontStyle = FontStyle.Bold;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = new Color(1f, 0.85f, 0.2f, 1f);
-            txt.text = "1,000 CR";
+            txt.text = "<b>CREDITS:</b> <color=#FFD700>1,000 CR</color>";
             txt.raycastTarget = false;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = textObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            outline.effectDistance = new Vector2(2f, -2f);
 
             var walletUI = walletRoot.AddComponent<WalletHUDUI>();
             var wso = new SerializedObject(walletUI);
@@ -632,8 +673,8 @@ namespace BeastClad.Editor
             rt.anchorMin = new Vector2(0.5f, 0f);
             rt.anchorMax = new Vector2(0.5f, 0f);
             rt.pivot = new Vector2(0.5f, 0f);
-            rt.anchoredPosition = new Vector2(0f, 160f);
-            rt.sizeDelta = new Vector2(620f, 50f);
+            rt.anchoredPosition = new Vector2(0f, 300f);
+            rt.sizeDelta = new Vector2(850f, 70f);
 
             var bgImg = promptRoot.AddComponent<Image>();
             bgImg.sprite = uisprite;
@@ -649,12 +690,17 @@ namespace BeastClad.Editor
 
             var txt = textObj.AddComponent<Text>();
             txt.font = font;
-            txt.fontSize = 20;
+            txt.fontSize = 26;
             txt.fontStyle = FontStyle.Bold;
             txt.alignment = TextAnchor.MiddleCenter;
-            txt.color = new Color(0.2f, 0.95f, 1f, 1f);
+            txt.color = new Color(0.22f, 0.74f, 0.97f, 1f);
             txt.text = "[ F ] Enter District";
             txt.raycastTarget = false;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = textObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            outline.effectDistance = new Vector2(2f, -2f);
 
             var promptUI = promptRoot.AddComponent<SceneTransitionPromptUI>();
             var pso = new SerializedObject(promptUI);
@@ -671,8 +717,8 @@ namespace BeastClad.Editor
             rt.anchorMin = new Vector2(0.5f, 1f);
             rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, -25f);
-            rt.sizeDelta = new Vector2(600f, 65f);
+            rt.anchoredPosition = new Vector2(0f, -35f);
+            rt.sizeDelta = new Vector2(900f, 75f);
 
             var bgImg = hudObj.AddComponent<Image>();
             bgImg.sprite = uisprite;
@@ -688,12 +734,17 @@ namespace BeastClad.Editor
 
             var bTxt = bannerTextObj.AddComponent<Text>();
             bTxt.font = font;
-            bTxt.fontSize = 18;
+            bTxt.fontSize = 26;
             bTxt.fontStyle = FontStyle.Bold;
             bTxt.alignment = TextAnchor.MiddleCenter;
             bTxt.color = Color.white;
             bTxt.text = "";
             bTxt.raycastTarget = false;
+            bTxt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = bannerTextObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            outline.effectDistance = new Vector2(2f, -2f);
 
             var scanUI = hudObj.AddComponent<MunicipalScannerHUD>();
             var sso = new SerializedObject(scanUI);
@@ -707,5 +758,27 @@ namespace BeastClad.Editor
             if (pTitle != null) pTitle.objectReferenceValue = bTxt;
             sso.ApplyModifiedProperties();
         }
+
+        private static void CreateStreetlampBollard(Transform parent, string name, Vector3 pos, Sprite uisprite, Sprite knob, Color lampColor)
+        {
+            var bollard = new GameObject(name);
+            bollard.transform.SetParent(parent, false);
+            bollard.transform.localPosition = pos;
+
+            // Base post
+            CreateSpriteObject(bollard.transform, "Post", uisprite,
+                new Vector3(0f, -0.3f, 0f), new Vector2(0.35f, 1.2f),
+                new Color(0.2f, 0.24f, 0.32f, 1f), 3);
+
+            // Glowing lamp head
+            var head = CreateSpriteObject(bollard.transform, "LampHead", knob,
+                new Vector3(0f, 0.45f, 0f), new Vector2(0.6f, 0.6f),
+                lampColor, 4);
+
+            // Soft physical collider
+            var col = bollard.AddComponent<CircleCollider2D>();
+            col.radius = 0.3f;
+        }
     }
 }
+

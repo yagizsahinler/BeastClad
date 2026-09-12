@@ -278,6 +278,7 @@ namespace BeastClad.UI
 
                 Debug.Log($"<color=#00FFAA>[Corporate Purchase]</color> Acquired <b>{pack.packName}</b>! Deducted <b>{pack.costCredits} Credits</b>. New Balance: <b>{wallet.Credits} Credits</b>.");
                 UpdateDisplay();
+                Persistence.SaveManager.Instance.SaveCurrentGame();
             }
         }
 

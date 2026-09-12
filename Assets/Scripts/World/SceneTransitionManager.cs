@@ -31,7 +31,7 @@ namespace BeastClad.World
                     {
                         var go = new GameObject("SceneTransitionManager");
                         instance = go.AddComponent<SceneTransitionManager>();
-                        DontDestroyOnLoad(go);
+                        if (Application.isPlaying) DontDestroyOnLoad(go);
                     }
                 }
                 return instance;
@@ -55,7 +55,7 @@ namespace BeastClad.World
             {
                 var go = new GameObject("SceneTransitionManager");
                 instance = go.AddComponent<SceneTransitionManager>();
-                DontDestroyOnLoad(go);
+                if (Application.isPlaying) DontDestroyOnLoad(go);
             }
         }
 
@@ -68,7 +68,7 @@ namespace BeastClad.World
             }
 
             instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Application.isPlaying) DontDestroyOnLoad(gameObject);
             EnsureFadeCanvas();
         }
 
@@ -212,6 +212,7 @@ namespace BeastClad.World
             isTransitioning = false;
 
             OnTransitionCompleted?.Invoke(sceneName);
+            Persistence.SaveManager.Instance.SaveCurrentGame(sceneName);
             Debug.Log($"<color=#00FFAA>[SceneTransition]</color> Successfully entered <b>{sceneName}</b> at '{targetSpawnTag}'.");
         }
     }

@@ -47,6 +47,16 @@ namespace BeastClad.UI
 
         private void Start()
         {
+            if (trapperComponent == null)
+            {
+                trapperComponent = FindAnyObjectByType<PlayerTrapperComponent>();
+                if (trapperComponent != null)
+                {
+                    trapperComponent.OnFieldPromptChanged += HandlePromptChanged;
+                    trapperComponent.OnMonsterCaptured += HandleMonsterCaptured;
+                }
+            }
+
             UpdateDisplay(defaultPrompt);
             UpdateCrateCount();
         }
@@ -71,15 +81,36 @@ namespace BeastClad.UI
 
         private void UpdateCrateCount()
         {
-            if (crateCountText != null && trapperComponent != null)
+            if (crateCountText != null)
             {
-                crateCountText.text = $"Specimen Crate: {trapperComponent.CapturedMonsters.Count} captured";
+                int count = 0;
+                if (trapperComponent != null)
+                {
+                    trapperComponent.SyncWithRoster();
+                    count = trapperComponent.CapturedMonsters.Count;
+                }
+                else
+                {
+                    var roster = FindAnyObjectByType<Player.PlayerMonsterRoster>();
+                    if (roster != null && roster.Roster != null) count = roster.Roster.Count;
+                }
+                crateCountText.text = $"Specimen Transport Crate: {count} captured";
             }
         }
 
         public void SetReferences(PlayerTrapperComponent trapper, Text prompt, Text count)
         {
+            if (trapperComponent != null)
+            {
+                trapperComponent.OnFieldPromptChanged -= HandlePromptChanged;
+                trapperComponent.OnMonsterCaptured -= HandleMonsterCaptured;
+            }
             trapperComponent = trapper;
+            if (trapperComponent != null)
+            {
+                trapperComponent.OnFieldPromptChanged += HandlePromptChanged;
+                trapperComponent.OnMonsterCaptured += HandleMonsterCaptured;
+            }
             promptText = prompt;
             crateCountText = count;
             UpdateDisplay(defaultPrompt);

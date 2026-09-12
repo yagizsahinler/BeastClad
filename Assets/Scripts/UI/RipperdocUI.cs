@@ -255,6 +255,7 @@ namespace BeastClad.UI
 
                 Debug.Log($"<color=#DC2626>[Ripperdoc Purchase]</color> Acquired contraband <b>{item.productTitle}</b> for <b>{item.costCredits} Credits</b>. Stability: {item.stabilityPercentage}%.");
                 UpdateDisplay();
+                Persistence.SaveManager.Instance.SaveCurrentGame();
             }
         }
 

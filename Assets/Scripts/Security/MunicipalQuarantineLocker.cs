@@ -230,6 +230,7 @@ namespace BeastClad.Security
             }
 
             RefreshPrompt();
+            BeastClad.Persistence.SaveManager.Instance.SaveCurrentGame();
             return count;
         }
 
@@ -262,6 +263,7 @@ namespace BeastClad.Security
             }
 
             RefreshPrompt();
+            BeastClad.Persistence.SaveManager.Instance.SaveCurrentGame();
             return count;
         }
 
@@ -280,6 +282,13 @@ namespace BeastClad.Security
                     : "QUARANTINE LOCKER\n[SECURE • READY]";
                 overheadLabel.color = hasItems ? stashedColor : emptyColor;
             }
+        }
+
+        public void SetStoredInstances(List<MonsterInstance> items)
+        {
+            quarantineVault.Clear();
+            if (items != null) quarantineVault.AddRange(items);
+            UpdateVisuals();
         }
 
         public void SetReferences(MunicipalScannerZone scanner, SpriteRenderer light, TextMesh label)

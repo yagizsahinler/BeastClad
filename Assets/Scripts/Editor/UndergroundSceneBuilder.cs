@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using BeastClad.Combat;
 using BeastClad.Data;
@@ -27,6 +28,7 @@ namespace BeastClad.Editor
             Sprite knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
             Sprite bgSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
             Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            VolumeProfile volumeProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>("Assets/Settings/DefaultVolumeProfile.asset");
 
             // ==========================================
             // 1. CAMERA & FOLLOW
@@ -38,11 +40,22 @@ namespace BeastClad.Editor
             cam.orthographic = true;
             cam.orthographicSize = 7.5f;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.08f, 0.09f, 0.12f, 1f); // Dark industrial navy
+            cam.backgroundColor = new Color(0.06f, 0.07f, 0.09f, 1f); // Dark industrial abyss
             camObj.AddComponent<AudioListener>();
+
+            var uacd = camObj.AddComponent<UniversalAdditionalCameraData>();
+            uacd.renderPostProcessing = true;
 
             var camFollow = camObj.AddComponent<CameraFollow2D>();
             camFollow.SetBounds(new Vector2(-10.0f, -6.5f), new Vector2(10.0f, 5.5f));
+
+            if (volumeProfile != null)
+            {
+                var volObj = new GameObject("Global Volume");
+                var vol = volObj.AddComponent<Volume>();
+                vol.isGlobal = true;
+                vol.profile = volumeProfile;
+            }
 
             // ==========================================
             // 2. 2D LIGHTING (URP 2D)
@@ -710,8 +723,8 @@ namespace BeastClad.Editor
 
             var tm = obj.AddComponent<TextMesh>();
             tm.text = mainText;
-            tm.fontSize = 30;
-            tm.characterSize = 0.055f;
+            tm.fontSize = 48;
+            tm.characterSize = 0.08f;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.alignment = TextAlignment.Center;
             tm.color = mainColor;
@@ -724,12 +737,12 @@ namespace BeastClad.Editor
             {
                 var subObj = new GameObject(name + "_Sub");
                 subObj.transform.SetParent(obj.transform, false);
-                subObj.transform.localPosition = new Vector3(0f, -0.32f, 0f);
+                subObj.transform.localPosition = new Vector3(0f, -0.48f, 0f);
 
                 var stm = subObj.AddComponent<TextMesh>();
                 stm.text = subText;
-                stm.fontSize = 20;
-                stm.characterSize = 0.045f;
+                stm.fontSize = 36;
+                stm.characterSize = 0.06f;
                 stm.anchor = TextAnchor.MiddleCenter;
                 stm.alignment = TextAlignment.Center;
                 stm.color = subColor ?? Color.white;
@@ -748,12 +761,12 @@ namespace BeastClad.Editor
             rt.anchorMin = new Vector2(1f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(1f, 1f);
-            rt.anchoredPosition = new Vector2(-25f, -25f);
-            rt.sizeDelta = new Vector2(240f, 50f);
+            rt.anchoredPosition = new Vector2(-30f, -30f);
+            rt.sizeDelta = new Vector2(280f, 60f);
 
             var bgImg = walletRoot.AddComponent<Image>();
             bgImg.sprite = uisprite;
-            bgImg.color = new Color(0.08f, 0.10f, 0.14f, 0.92f);
+            bgImg.color = new Color(0.08f, 0.10f, 0.14f, 0.94f);
             bgImg.raycastTarget = false;
 
             var textObj = new GameObject("WalletText");
@@ -765,12 +778,17 @@ namespace BeastClad.Editor
 
             var txt = textObj.AddComponent<Text>();
             txt.font = font;
-            txt.fontSize = 20;
+            txt.fontSize = 26;
             txt.fontStyle = FontStyle.Bold;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = new Color(1f, 0.85f, 0.2f, 1f);
-            txt.text = "1,000 CR";
+            txt.text = "<b>CREDITS:</b> <color=#FFD700>1,000 CR</color>";
             txt.raycastTarget = false;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = textObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            outline.effectDistance = new Vector2(2f, -2f);
 
             var walletUI = walletRoot.AddComponent<WalletHUDUI>();
             var wso = new SerializedObject(walletUI);
@@ -786,8 +804,8 @@ namespace BeastClad.Editor
             rt.anchorMin = new Vector2(0.5f, 0f);
             rt.anchorMax = new Vector2(0.5f, 0f);
             rt.pivot = new Vector2(0.5f, 0f);
-            rt.anchoredPosition = new Vector2(0f, 160f);
-            rt.sizeDelta = new Vector2(620f, 50f);
+            rt.anchoredPosition = new Vector2(0f, 300f);
+            rt.sizeDelta = new Vector2(850f, 70f);
 
             var bgImg = promptRoot.AddComponent<Image>();
             bgImg.sprite = uisprite;
@@ -803,12 +821,17 @@ namespace BeastClad.Editor
 
             var txt = textObj.AddComponent<Text>();
             txt.font = font;
-            txt.fontSize = 20;
+            txt.fontSize = 26;
             txt.fontStyle = FontStyle.Bold;
             txt.alignment = TextAnchor.MiddleCenter;
-            txt.color = new Color(0.2f, 0.95f, 1f, 1f);
+            txt.color = new Color(0.22f, 0.74f, 0.97f, 1f);
             txt.text = "[ F ] Climb Stairs to Central Metro District";
             txt.raycastTarget = false;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = textObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            outline.effectDistance = new Vector2(2f, -2f);
 
             var promptUI = promptRoot.AddComponent<SceneTransitionPromptUI>();
             var pso = new SerializedObject(promptUI);
@@ -832,14 +855,14 @@ namespace BeastClad.Editor
             var promptObj = new GameObject("RipperdocPromptPanel");
             promptObj.transform.SetParent(managerObj.transform, false);
             var prt = promptObj.AddComponent<RectTransform>();
-            prt.anchorMin = new Vector2(0.5f, 0.12f);
-            prt.anchorMax = new Vector2(0.5f, 0.12f);
+            prt.anchorMin = new Vector2(0.5f, 0.16f);
+            prt.anchorMax = new Vector2(0.5f, 0.16f);
             prt.pivot = new Vector2(0.5f, 0.5f);
-            prt.sizeDelta = new Vector2(460f, 48f);
+            prt.sizeDelta = new Vector2(580f, 60f);
 
             var pbg = promptObj.AddComponent<Image>();
             pbg.sprite = uisprite;
-            pbg.color = new Color(0.1f, 0.04f, 0.06f, 0.92f);
+            pbg.color = new Color(0.1f, 0.04f, 0.06f, 0.94f);
             pbg.raycastTarget = false;
 
             var pTextObj = new GameObject("PromptText");
@@ -850,11 +873,17 @@ namespace BeastClad.Editor
             ptrt.sizeDelta = Vector2.zero;
             var ptxt = pTextObj.AddComponent<Text>();
             ptxt.font = font;
-            ptxt.fontSize = 18;
+            ptxt.fontSize = 24;
+            ptxt.fontStyle = FontStyle.Bold;
             ptxt.alignment = TextAnchor.MiddleCenter;
             ptxt.color = new Color(1f, 0.25f, 0.4f, 1f);
             ptxt.text = "[ F ] Consult Dr. Silas (Ripperdoc)";
             ptxt.raycastTarget = false;
+            ptxt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var pOutline = pTextObj.AddComponent<Outline>();
+            pOutline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+            pOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
             // 2. Modal Panel
             var modalObj = new GameObject("RipperdocModalPanel");
@@ -863,69 +892,69 @@ namespace BeastClad.Editor
             mort.anchorMin = new Vector2(0.5f, 0.5f);
             mort.anchorMax = new Vector2(0.5f, 0.5f);
             mort.pivot = new Vector2(0.5f, 0.5f);
-            mort.sizeDelta = new Vector2(760f, 540f);
+            mort.sizeDelta = new Vector2(920f, 640f);
 
             var mbg = modalObj.AddComponent<Image>();
             mbg.sprite = bgSprite;
             mbg.color = new Color(0.08f, 0.04f, 0.06f, 0.96f);
 
             // Title & Subtitle
-            var titleTxt = CreateText(modalObj.transform, "Title", font, 24, FontStyle.Bold, TextAnchor.UpperCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -30f), new Vector2(650f, 40f),
+            var titleTxt = CreateText(modalObj.transform, "Title", font, 32, FontStyle.Bold, TextAnchor.UpperCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -30f), new Vector2(800f, 45f),
                 new Color(1f, 0.2f, 0.35f, 1f), "DR. SILAS'S NEURO-CLINIC");
 
-            var subTxt = CreateText(modalObj.transform, "Subtitle", font, 14, FontStyle.Italic, TextAnchor.UpperCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -65f), new Vector2(650f, 30f),
-                new Color(0.7f, 0.7f, 0.75f, 1f), "Unlicensed Neuro-Chirurgeon • Contraband Bio-Augments");
+            var subTxt = CreateText(modalObj.transform, "Subtitle", font, 20, FontStyle.Italic, TextAnchor.UpperCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -75f), new Vector2(800f, 30f),
+                new Color(0.75f, 0.75f, 0.8f, 1f), "Unlicensed Neuro-Chirurgeon • Contraband Bio-Augments");
 
             // Product Title & Warning Badge
-            var prodTitleTxt = CreateText(modalObj.transform, "ProdTitle", font, 22, FontStyle.Bold, TextAnchor.MiddleLeft,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-80f, -120f), new Vector2(450f, 35f),
+            var prodTitleTxt = CreateText(modalObj.transform, "ProdTitle", font, 28, FontStyle.Bold, TextAnchor.MiddleLeft,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-100f, -130f), new Vector2(550f, 40f),
                 new Color(1f, 0.85f, 0.2f, 1f), "OVERCLOCKED SPECIMEN");
 
-            var warnBadgeTxt = CreateText(modalObj.transform, "WarningBadge", font, 14, FontStyle.Bold, TextAnchor.MiddleRight,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(230f, -120f), new Vector2(200f, 35f),
-                new Color(1f, 0.15f, 0.25f, 1f), "[ CONTRABAND ]");
+            var warnBadgeTxt = CreateText(modalObj.transform, "WarningBadge", font, 22, FontStyle.Bold, TextAnchor.MiddleRight,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(280f, -130f), new Vector2(260f, 40f),
+                new Color(1f, 0.2f, 0.3f, 1f), "[ CONTRABAND ]");
 
             // Description
-            var descTxt = CreateText(modalObj.transform, "Description", font, 15, FontStyle.Normal, TextAnchor.UpperLeft,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(660f, 65f),
+            var descTxt = CreateText(modalObj.transform, "Description", font, 20, FontStyle.Normal, TextAnchor.UpperLeft,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -195f), new Vector2(800f, 80f),
                 Color.white, "Description text goes here.");
 
             // Overclock Stats
-            var statsTxt = CreateText(modalObj.transform, "Stats", font, 15, FontStyle.Normal, TextAnchor.UpperLeft,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(660f, 80f),
+            var statsTxt = CreateText(modalObj.transform, "Stats", font, 20, FontStyle.Normal, TextAnchor.UpperLeft,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -285f), new Vector2(800f, 90f),
                 new Color(0.2f, 0.9f, 1f, 1f), "+Overclock Attack / -Recoil HP");
 
             // Price & Balance
-            var priceTxt = CreateText(modalObj.transform, "Price", font, 18, FontStyle.Bold, TextAnchor.MiddleLeft,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-160f, 140f), new Vector2(300f, 35f),
+            var priceTxt = CreateText(modalObj.transform, "Price", font, 26, FontStyle.Bold, TextAnchor.MiddleLeft,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-180f, 140f), new Vector2(350f, 40f),
                 new Color(1f, 0.85f, 0.2f, 1f), "PRICE: 350 CR");
 
-            var balTxt = CreateText(modalObj.transform, "Balance", font, 16, FontStyle.Normal, TextAnchor.MiddleRight,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(160f, 140f), new Vector2(300f, 35f),
+            var balTxt = CreateText(modalObj.transform, "Balance", font, 24, FontStyle.Bold, TextAnchor.MiddleRight,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(180f, 140f), new Vector2(350f, 40f),
                 new Color(0f, 1f, 0.7f, 1f), "PURSE: 1,000 CR");
 
-            var feedTxt = CreateText(modalObj.transform, "Feedback", font, 14, FontStyle.Italic, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 100f), new Vector2(600f, 30f),
+            var feedTxt = CreateText(modalObj.transform, "Feedback", font, 20, FontStyle.Italic, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 100f), new Vector2(700f, 35f),
                 Color.yellow, "");
 
             // Buttons
-            var prevBtn = CreateButton(modalObj.transform, "Btn_Prev", font, "< PREV", uisprite,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-220f, 50f), new Vector2(120f, 44f),
+            var prevBtn = CreateButton(modalObj.transform, "Btn_Prev", font, "< PREV [Q]", uisprite,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-260f, 50f), new Vector2(160f, 55f),
                 new Color(0.2f, 0.2f, 0.25f, 1f));
 
-            var buyBtn = CreateButton(modalObj.transform, "Btn_Buy", font, "PURCHASE & IMPLANT", uisprite,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(260f, 44f),
+            var buyBtn = CreateButton(modalObj.transform, "Btn_Buy", font, "PURCHASE & IMPLANT [ENTER]", uisprite,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(340f, 55f),
                 new Color(0.8f, 0.15f, 0.25f, 1f));
 
-            var nextBtn = CreateButton(modalObj.transform, "Btn_Next", font, "NEXT >", uisprite,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(220f, 50f), new Vector2(120f, 44f),
+            var nextBtn = CreateButton(modalObj.transform, "Btn_Next", font, "NEXT [E] >", uisprite,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(260f, 50f), new Vector2(160f, 55f),
                 new Color(0.2f, 0.2f, 0.25f, 1f));
 
             var closeBtn = CreateButton(modalObj.transform, "Btn_Close", font, "X", uisprite,
-                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(40f, 40f),
-                new Color(0.4f, 0.1f, 0.1f, 1f));
+                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-35f, -35f), new Vector2(48f, 48f),
+                new Color(0.4f, 0.1f, 0.1f, 1f), 24);
 
             modalObj.SetActive(false);
             promptObj.SetActive(false);
@@ -966,17 +995,17 @@ namespace BeastClad.Editor
             var promptObj = new GameObject("PitPromptPanel");
             promptObj.transform.SetParent(managerObj.transform, false);
             var prt = promptObj.AddComponent<RectTransform>();
-            prt.anchorMin = new Vector2(0.5f, 0.12f);
-            prt.anchorMax = new Vector2(0.5f, 0.12f);
+            prt.anchorMin = new Vector2(0.5f, 0.16f);
+            prt.anchorMax = new Vector2(0.5f, 0.16f);
             prt.pivot = new Vector2(0.5f, 0.5f);
-            prt.sizeDelta = new Vector2(480f, 48f);
+            prt.sizeDelta = new Vector2(580f, 60f);
 
             var pbg = promptObj.AddComponent<Image>();
             pbg.sprite = uisprite;
-            pbg.color = new Color(0.12f, 0.08f, 0.02f, 0.92f);
+            pbg.color = new Color(0.12f, 0.08f, 0.02f, 0.94f);
             pbg.raycastTarget = false;
 
-            var ptxt = CreateText(promptObj.transform, "PromptText", font, 18, FontStyle.Normal, TextAnchor.MiddleCenter,
+            var ptxt = CreateText(promptObj.transform, "PromptText", font, 24, FontStyle.Bold, TextAnchor.MiddleCenter,
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
                 new Color(1f, 0.75f, 0.2f, 1f), "[ F ] Talk to Pitmaster Jax (Place Wager)");
 
@@ -987,52 +1016,52 @@ namespace BeastClad.Editor
             mort.anchorMin = new Vector2(0.5f, 0.5f);
             mort.anchorMax = new Vector2(0.5f, 0.5f);
             mort.pivot = new Vector2(0.5f, 0.5f);
-            mort.sizeDelta = new Vector2(720f, 500f);
+            mort.sizeDelta = new Vector2(920f, 640f);
 
             var mbg = modalObj.AddComponent<Image>();
             mbg.sprite = bgSprite;
             mbg.color = new Color(0.10f, 0.07f, 0.04f, 0.96f);
 
-            var titleTxt = CreateText(modalObj.transform, "ModalTitle", font, 24, FontStyle.Bold, TextAnchor.UpperCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -30f), new Vector2(650f, 40f),
+            var titleTxt = CreateText(modalObj.transform, "ModalTitle", font, 32, FontStyle.Bold, TextAnchor.UpperCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -30f), new Vector2(800f, 45f),
                 new Color(1f, 0.65f, 0.15f, 1f), "UNSANCTIONED PIT DEATHMATCH");
 
-            var subTxt = CreateText(modalObj.transform, "ModalSubtitle", font, 14, FontStyle.Italic, TextAnchor.UpperCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -65f), new Vector2(650f, 30f),
-                new Color(0.8f, 0.75f, 0.65f, 1f), "Pitmaster Jax: 'Place yer bet, fleshbag. Winner takes all—2.5x payout!'");
+            var subTxt = CreateText(modalObj.transform, "ModalSubtitle", font, 20, FontStyle.Italic, TextAnchor.UpperCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -75f), new Vector2(800f, 30f),
+                new Color(0.85f, 0.8f, 0.7f, 1f), "Pitmaster Jax: 'Place yer bet, fleshbag. Winner takes all—2.5x payout!'");
 
             // Wager Tier Buttons
             var btn100 = CreateButton(modalObj.transform, "Btn_Wager100", font, "100 CR\n(Payout: 250 CR)", uisprite,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-200f, -150f), new Vector2(170f, 70f),
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-220f, -165f), new Vector2(190f, 75f),
                 new Color(0.25f, 0.2f, 0.15f, 1f));
 
             var btn250 = CreateButton(modalObj.transform, "Btn_Wager250", font, "250 CR\n(Payout: 625 CR)", uisprite,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(170f, 70f),
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -165f), new Vector2(190f, 75f),
                 new Color(0.45f, 0.3f, 0.1f, 1f));
 
             var btn500 = CreateButton(modalObj.transform, "Btn_Wager500", font, "500 CR\n(Payout: 1,250 CR)", uisprite,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(200f, -150f), new Vector2(170f, 70f),
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(220f, -165f), new Vector2(190f, 75f),
                 new Color(0.25f, 0.2f, 0.15f, 1f));
 
-            var wagerTxt = CreateText(modalObj.transform, "SelectedWagerText", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -230f), new Vector2(600f, 35f),
+            var wagerTxt = CreateText(modalObj.transform, "SelectedWagerText", font, 24, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -255f), new Vector2(700f, 40f),
                 new Color(1f, 0.85f, 0.2f, 1f), "Selected Wager: 250 Credits");
 
-            var payoutTxt = CreateText(modalObj.transform, "PayoutInfoText", font, 18, FontStyle.Normal, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -270f), new Vector2(600f, 35f),
+            var payoutTxt = CreateText(modalObj.transform, "PayoutInfoText", font, 22, FontStyle.Normal, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -300f), new Vector2(700f, 40f),
                 new Color(0f, 1f, 0.7f, 1f), "Potential Payout: 625 Credits (+375 Net @ 2.5x)");
 
-            var balanceTxt = CreateText(modalObj.transform, "WalletBalanceText", font, 16, FontStyle.Normal, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 130f), new Vector2(500f, 30f),
+            var balanceTxt = CreateText(modalObj.transform, "WalletBalanceText", font, 24, FontStyle.Normal, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 140f), new Vector2(600f, 35f),
                 new Color(0.3f, 0.8f, 1f, 1f), "Purse Balance: 1,000 Credits");
 
             var enterBtn = CreateButton(modalObj.transform, "Btn_EnterPit", font, "BET & ENTER THE PIT [SPACE]", uisprite,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 60f), new Vector2(340f, 50f),
-                new Color(0.85f, 0.35f, 0.1f, 1f));
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 60f), new Vector2(380f, 55f),
+                new Color(0.85f, 0.35f, 0.1f, 1f), 24);
 
             var closeWagerBtn = CreateButton(modalObj.transform, "Btn_CloseWager", font, "X", uisprite,
-                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -30f), new Vector2(40f, 40f),
-                new Color(0.4f, 0.15f, 0.1f, 1f));
+                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-35f, -35f), new Vector2(48f, 48f),
+                new Color(0.4f, 0.15f, 0.1f, 1f), 24);
 
             // 3. Central Announcer Banner
             var bannerRoot = new GameObject("PitAnnouncerBanner");
@@ -1041,20 +1070,20 @@ namespace BeastClad.Editor
             brt.anchorMin = new Vector2(0.5f, 0.6f);
             brt.anchorMax = new Vector2(0.5f, 0.6f);
             brt.pivot = new Vector2(0.5f, 0.5f);
-            brt.sizeDelta = new Vector2(700f, 120f);
+            brt.sizeDelta = new Vector2(800f, 130f);
 
             var bnbg = bannerRoot.AddComponent<Image>();
             bnbg.sprite = uisprite;
-            bnbg.color = new Color(0.08f, 0.04f, 0.04f, 0.9f);
+            bnbg.color = new Color(0.08f, 0.04f, 0.04f, 0.95f);
             bnbg.raycastTarget = false;
 
             var annMain = CreateText(bannerRoot.transform, "MainText", font, 54, FontStyle.Bold, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 12f), new Vector2(650f, 65f),
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 15f), new Vector2(750f, 65f),
                 new Color(1f, 0.8f, 0.1f, 1f), "3");
 
-            var annSub = CreateText(bannerRoot.transform, "SubText", font, 16, FontStyle.Normal, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -30f), new Vector2(650f, 30f),
-                new Color(0.8f, 0.8f, 0.8f, 1f), "UNSANCTIONED DEATHMATCH COMMENCING");
+            var annSub = CreateText(bannerRoot.transform, "SubText", font, 24, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -35f), new Vector2(750f, 35f),
+                new Color(0.9f, 0.9f, 0.9f, 1f), "UNSANCTIONED DEATHMATCH COMMENCING");
 
             // 4. Brawler Boss Bar (Top Center)
             var bossBarRoot = new GameObject("BrawlerBossBar");
@@ -1063,21 +1092,21 @@ namespace BeastClad.Editor
             bbrt.anchorMin = new Vector2(0.5f, 1f);
             bbrt.anchorMax = new Vector2(0.5f, 1f);
             bbrt.pivot = new Vector2(0.5f, 1f);
-            bbrt.anchoredPosition = new Vector2(0f, -25f);
-            bbrt.sizeDelta = new Vector2(500f, 60f);
+            bbrt.anchoredPosition = new Vector2(0f, -35f);
+            bbrt.sizeDelta = new Vector2(720f, 65f);
 
             var bbBg = bossBarRoot.AddComponent<Image>();
             bbBg.sprite = uisprite;
-            bbBg.color = new Color(0.12f, 0.06f, 0.06f, 0.92f);
+            bbBg.color = new Color(0.12f, 0.06f, 0.06f, 0.95f);
             bbBg.raycastTarget = false;
 
-            var bNameTxt = CreateText(bossBarRoot.transform, "BrawlerName", font, 18, FontStyle.Bold, TextAnchor.MiddleLeft,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-70f, -16f), new Vector2(320f, 25f),
+            var bNameTxt = CreateText(bossBarRoot.transform, "BrawlerName", font, 24, FontStyle.Bold, TextAnchor.MiddleLeft,
+                new Vector2(0.03f, 0.5f), new Vector2(0.65f, 0.95f), Vector2.zero, Vector2.zero,
                 new Color(1f, 0.35f, 0.35f, 1f), "Grimlock the Flesh-Render");
 
-            var bEpiTxt = CreateText(bossBarRoot.transform, "BrawlerEpithet", font, 12, FontStyle.Italic, TextAnchor.MiddleRight,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(130f, -16f), new Vector2(200f, 25f),
-                new Color(0.8f, 0.6f, 0.4f, 1f), "Pit Champion");
+            var bEpiTxt = CreateText(bossBarRoot.transform, "BrawlerEpithet", font, 18, FontStyle.Italic, TextAnchor.MiddleRight,
+                new Vector2(0.65f, 0.5f), new Vector2(0.97f, 0.95f), Vector2.zero, Vector2.zero,
+                new Color(0.9f, 0.7f, 0.4f, 1f), "Pit Champion");
 
             // Health Bar Background & Fill
             var hbBgObj = new GameObject("HealthBar_BG");
@@ -1087,7 +1116,7 @@ namespace BeastClad.Editor
             hbrt.anchorMax = new Vector2(0.5f, 0f);
             hbrt.pivot = new Vector2(0.5f, 0.5f);
             hbrt.anchoredPosition = new Vector2(0f, 18f);
-            hbrt.sizeDelta = new Vector2(460f, 18f);
+            hbrt.sizeDelta = new Vector2(680f, 24f);
             var hbBgImg = hbBgObj.AddComponent<Image>();
             hbBgImg.sprite = uisprite;
             hbBgImg.color = new Color(0.25f, 0.1f, 0.1f, 1f);
@@ -1108,7 +1137,7 @@ namespace BeastClad.Editor
             hbFillImg.color = new Color(0.95f, 0.2f, 0.2f, 1f);
             hbFillImg.raycastTarget = false;
 
-            var hbNumTxt = CreateText(hbBgObj.transform, "HealthNum", font, 11, FontStyle.Bold, TextAnchor.MiddleCenter,
+            var hbNumTxt = CreateText(hbBgObj.transform, "HealthNum", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
                 Color.white, "220 / 220 HP");
 
@@ -1119,23 +1148,23 @@ namespace BeastClad.Editor
             ort.anchorMin = new Vector2(0.5f, 0.5f);
             ort.anchorMax = new Vector2(0.5f, 0.5f);
             ort.pivot = new Vector2(0.5f, 0.5f);
-            ort.sizeDelta = new Vector2(620f, 380f);
+            ort.sizeDelta = new Vector2(720f, 440f);
 
             var obg = outcomeObj.AddComponent<Image>();
             obg.sprite = bgSprite;
             obg.color = new Color(0.08f, 0.05f, 0.05f, 0.98f);
 
-            var outTitle = CreateText(outcomeObj.transform, "OutcomeTitle", font, 32, FontStyle.Bold, TextAnchor.UpperCenter,
-                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(550f, 50f),
+            var outTitle = CreateText(outcomeObj.transform, "OutcomeTitle", font, 36, FontStyle.Bold, TextAnchor.UpperCenter,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(650f, 50f),
                 new Color(0f, 1f, 0.7f, 1f), "PIT CHAMPION!");
 
-            var outDetails = CreateText(outcomeObj.transform, "OutcomeDetails", font, 18, FontStyle.Normal, TextAnchor.MiddleCenter,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(520f, 140f),
+            var outDetails = CreateText(outcomeObj.transform, "OutcomeDetails", font, 24, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(650f, 140f),
                 Color.white, "You butchered the brawler and seized the purse!\n\n+625 Credits");
 
             var retHubBtn = CreateButton(outcomeObj.transform, "Btn_ReturnHub", font, "COLLECT & RETURN TO HUB [ENTER]", uisprite,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(340f, 48f),
-                new Color(0.2f, 0.6f, 0.4f, 1f));
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(400f, 55f),
+                new Color(0.2f, 0.6f, 0.4f, 1f), 22);
 
             promptObj.SetActive(false);
             modalObj.SetActive(false);
@@ -1197,11 +1226,17 @@ namespace BeastClad.Editor
             txt.color = color;
             txt.text = initialText;
             txt.raycastTarget = false;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = obj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+
             return txt;
         }
 
         private static Button CreateButton(Transform parent, string name, Font font, string label, Sprite sprite,
-            Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 sizeDelta, Color bgColor)
+            Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 sizeDelta, Color bgColor, int fontSize = 22)
         {
             var obj = new GameObject(name);
             obj.transform.SetParent(parent, false);
@@ -1229,12 +1264,17 @@ namespace BeastClad.Editor
 
             var txt = textObj.AddComponent<Text>();
             txt.font = font;
-            txt.fontSize = 15;
+            txt.fontSize = fontSize;
             txt.fontStyle = FontStyle.Bold;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = Color.white;
             txt.text = label;
             txt.raycastTarget = false;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var outline = textObj.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
 
             return btn;
         }

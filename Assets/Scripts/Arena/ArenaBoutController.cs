@@ -60,6 +60,11 @@ namespace BeastClad.Arena
             if (playerStats == null) playerStats = FindAnyObjectByType<PlayerStatsComponent>();
             if (playerWallet == null) playerWallet = FindAnyObjectByType<PlayerWallet>();
             if (gladiator == null) gladiator = FindAnyObjectByType<SanctionedGladiatorAI2D>();
+
+            if (World.PlayerSessionState.HasActiveSession)
+            {
+                currentRankIndex = Mathf.Clamp(World.PlayerSessionState.ArenaRankIndex, 0, divisionRanks.Count - 1);
+            }
         }
 
         private void OnEnable()
@@ -160,7 +165,9 @@ namespace BeastClad.Arena
             string newRank = CurrentRank;
 
             Debug.Log($"<color=#FFD700>[Arena Victory!]</color> Player won the bout! Awarded <b>+{prizePurseCredits} Credits</b>. Promoted to: <b>{newRank}</b>.");
+            World.PlayerSessionState.SetArenaRankDirect(currentRankIndex, newRank);
             OnMatchConcluded?.Invoke(true, prizePurseCredits, newRank);
+            Persistence.SaveManager.Instance.SaveCurrentGame();
         }
 
         private void UnlockPostMatchMovement()
@@ -193,6 +200,12 @@ namespace BeastClad.Arena
 
             Debug.Log("<color=#FF4444>[Arena Defeat]</color> Player was knocked out! Bout terminated.");
             OnMatchConcluded?.Invoke(false, 0, CurrentRank);
+            Persistence.SaveManager.Instance.SaveCurrentGame();
+        }
+
+        public void SetRankIndex(int index)
+        {
+            currentRankIndex = Mathf.Clamp(index, 0, divisionRanks.Count - 1);
         }
 
         public void RestartBout()

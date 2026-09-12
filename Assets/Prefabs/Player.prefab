@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 6133937862877121809}
   - component: {fileID: 8934627850685854022}
   - component: {fileID: 8755054080920480007}
+  - component: {fileID: 725565169894038967}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -305,3 +306,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Player.PlayerMonsterRoster
   roster: []
+--- !u!114 &725565169894038967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8664380684416709690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbbb7d5dd05618c4d8aff60f35d11e7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.Trapping.PlayerTrapperComponent
+  defaultLure: {fileID: 11400000, guid: 0154eb4fbe152b644909a144c63574da, type: 2}
+  defaultTrap: {fileID: 11400000, guid: e55bd222eecad6c4abb9f47c4e4768ae, type: 2}
+  baitSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  circleAuraSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  trapOpenSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  trapSprungSprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  captureInteractionRadius: 2.5

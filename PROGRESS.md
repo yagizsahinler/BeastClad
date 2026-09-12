@@ -3,7 +3,7 @@
 **Project:** BeastClad  
 **Lead Technical Producer Status Dashboard**  
 **Engineering Philosophy:** KISS (Keep It Simple, Stupid) & YAGNI (You Aren't Gonna Need It)  
-**Last Updated:** 2026-09-09  
+**Last Updated:** 2026-09-13  
 
 ---
 
@@ -12,7 +12,7 @@
 | Metric | Current State |
 | :--- | :--- |
 | **Active Phase** | **Phase 5: World Integration, Persistence & Roster Management** |
-| **Current Focus** | Completed Phase 5.1 (Ready for Phase 5.2: Save & Load System) |
+| **Current Focus** | Completed Phase 5.2 (Ready for Phase 5.3: Dedicated Roster & Infuse Management UI) |
 | **Active Blockers** | None |
 | **Target Build Target** | PC Standalone / Unity Editor Test Arena |
 
@@ -109,12 +109,13 @@
   - [x] Preserve player character data, equipped modules, and wallet credits across scene changes without state desync.
   - [x] Integrate municipal security checkpoint scanner gates at entrances between illegal/wild zones and civil/arena districts.
   - [x] Implement Municipal Security Quarantine Locker and Quick-Disarm (`[E]` / `[F]`) at checkpoint to safely unequip and vault contraband before entering tournament arena.
+  - [x] Comprehensive visual refinement and quality overhaul across all 4 scenes (Colosseum amphitheater, Outlands woodland biome, Cyberpunk Undercity, and Central Transit Concourse) with URP 2D lighting and post-processing volumes.
 
-- [ ] **5.2 Persistent Save & Load System (JSON)**
-  - [ ] Design robust, serializable Save Data contracts (`PlayerSaveData`: Credits, Roster Monsters, Equipped Slots, Arena Rank, Story Flags).
-  - [ ] Implement atomic file I/O `SaveManager` service writing to `Application.persistentDataPath/savegame.json`.
-  - [ ] Implement auto-save triggers on scene transitions, kiosk purchases, capture events, and match conclusions.
-  - [ ] Provide load-game initialization on startup with graceful fallback to fresh defaults if no save file is detected.
+- [x] **5.2 Persistent Save & Load System (JSON)**
+  - [x] Design robust, serializable Save Data contracts (`PlayerSaveData`: Credits, Roster Monsters, Equipped Slots, Arena Rank, Story Flags).
+  - [x] Implement atomic file I/O `SaveManager` service writing to `Application.persistentDataPath/savegame.json`.
+  - [x] Implement auto-save triggers on scene transitions, kiosk purchases, capture events, and match conclusions.
+  - [x] Provide load-game initialization on startup with graceful fallback to fresh defaults if no save file is detected.
 
 - [ ] **5.3 Dedicated Roster & Infuse Management UI**
   - [ ] Build full-screen / modal Roster & Infuse management window toggled via `[Tab]` or `[I]`.

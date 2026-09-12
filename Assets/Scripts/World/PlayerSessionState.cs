@@ -17,12 +17,16 @@ namespace BeastClad.World
         public static bool HasActiveSession { get; private set; }
         public static int Credits { get; private set; }
         public static string PendingSpawnTag { get; set; } = string.Empty;
+        public static int ArenaRankIndex { get; private set; } = 0;
+        public static string ArenaRankTitle { get; private set; } = "Bronze League - Rank III";
 
         private static readonly List<MonsterInstance> savedRoster = new List<MonsterInstance>();
         private static readonly Dictionary<EquipmentSlot, MonsterInstance> savedEquippedInstances = new Dictionary<EquipmentSlot, MonsterInstance>();
         private static readonly Dictionary<EquipmentSlot, MonsterDataSO> savedEquippedMonsters = new Dictionary<EquipmentSlot, MonsterDataSO>();
+        private static readonly List<MonsterInstance> savedQuarantine = new List<MonsterInstance>();
 
         public static IReadOnlyList<MonsterInstance> SavedRoster => savedRoster;
+        public static IReadOnlyList<MonsterInstance> SavedQuarantine => savedQuarantine;
 
         /// <summary>
         /// Extracts and caches runtime state from the active player GameObject.
@@ -125,14 +129,57 @@ namespace BeastClad.World
             Debug.Log($"<color=#38BDF8>[PlayerSessionState]</color> Restored state onto player: <b>{Credits} Credits</b>, <b>{savedRoster.Count} Roster Specimens</b>.");
         }
 
+        public static void SetCreditsDirect(int amount)
+        {
+            Credits = Mathf.Max(0, amount);
+            HasActiveSession = true;
+        }
+
+        public static void SetArenaRankDirect(int rankIndex, string rankTitle)
+        {
+            ArenaRankIndex = Mathf.Max(0, rankIndex);
+            if (!string.IsNullOrEmpty(rankTitle)) ArenaRankTitle = rankTitle;
+            HasActiveSession = true;
+        }
+
+        public static void SetRosterDirect(List<MonsterInstance> roster)
+        {
+            savedRoster.Clear();
+            if (roster != null) savedRoster.AddRange(roster);
+            HasActiveSession = true;
+        }
+
+        public static void SetEquippedSlotsDirect(Dictionary<EquipmentSlot, MonsterInstance> slots)
+        {
+            savedEquippedInstances.Clear();
+            if (slots != null)
+            {
+                foreach (var kvp in slots)
+                {
+                    savedEquippedInstances[kvp.Key] = kvp.Value;
+                }
+            }
+            HasActiveSession = true;
+        }
+
+        public static void SetQuarantinedMonstersDirect(List<MonsterInstance> monsters)
+        {
+            savedQuarantine.Clear();
+            if (monsters != null) savedQuarantine.AddRange(monsters);
+            HasActiveSession = true;
+        }
+
         public static void ClearSession()
         {
             HasActiveSession = false;
             Credits = 0;
             PendingSpawnTag = string.Empty;
+            ArenaRankIndex = 0;
+            ArenaRankTitle = "Bronze League - Rank III";
             savedRoster.Clear();
             savedEquippedInstances.Clear();
             savedEquippedMonsters.Clear();
+            savedQuarantine.Clear();
         }
     }
 }

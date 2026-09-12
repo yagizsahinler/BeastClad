@@ -33,6 +33,26 @@ namespace BeastClad.Trapping
         public event Action<MonsterInstance> OnMonsterCaptured;
         public event Action<string> OnFieldPromptChanged;
 
+        private void Start()
+        {
+            SyncWithRoster();
+        }
+
+        public void SyncWithRoster()
+        {
+            var roster = GetComponent<Player.PlayerMonsterRoster>();
+            if (roster != null && roster.Roster != null)
+            {
+                foreach (var m in roster.Roster)
+                {
+                    if (m != null && !CapturedMonsters.Contains(m))
+                    {
+                        CapturedMonsters.Add(m);
+                    }
+                }
+            }
+        }
+
         private void Update()
         {
             HandleInput();
@@ -146,6 +166,7 @@ namespace BeastClad.Trapping
                             }
                             OnMonsterCaptured?.Invoke(captured);
                             Debug.Log($"<color=#00FFCC>[Trapper Vault]</color> Total specimens in transport crate: <b>{CapturedMonsters.Count}</b>.");
+                            Persistence.SaveManager.Instance.SaveCurrentGame();
                             return true;
                         }
                     }

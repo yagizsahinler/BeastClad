@@ -57,4 +57,8 @@
 - **Issue:** Instantiating prefabs in editor builder scripts (`PrefabUtility.InstantiatePrefab(prefab)`) retains the root tag of the underlying asset. If the prefab asset is `Untagged`, `GameObject.FindWithTag("Player")` fails even if the scene instance was renamed to `Player`. Additionally, modifying an editor script file requires triggering `refresh_unity` before executing `execute_code` that calls the builder methods, otherwise Unity executes stale in-memory code.
 - **Pattern:** Always configure and save tags directly on the source prefab asset (`playerPrefab.tag = "Player"`), and always invoke `refresh_unity` immediately after modifying C# script files before executing their methods in-editor.
 
+## 15. `DontDestroyOnLoad` in Edit Mode / Editor Execution
+- **Issue:** In Unity, invoking `DontDestroyOnLoad(go)` outside of Play Mode (such as during editor scripts, MCP dynamic execution, or edit-mode testing) throws `InvalidOperationException: The following game object is invoking the DontDestroyOnLoad method: [Name]. Notice that DontDestroyOnLoad can only be used in play mode`.
+- **Pattern:** Always guard `DontDestroyOnLoad` calls with `if (Application.isPlaying) DontDestroyOnLoad(go);` on persistent singletons and runtime bootstrap helpers so they remain completely safe for editor-time unit tests, builder scripts, and tool inspection.
+
 
