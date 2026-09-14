@@ -8,6 +8,7 @@ namespace BeastClad.Arena
 {
     public enum ArenaBoutState
     {
+        Idle,
         PreMatch,
         ActiveBout,
         Victory,
@@ -41,7 +42,10 @@ namespace BeastClad.Arena
         };
         private int currentRankIndex = 0;
 
-        private ArenaBoutState currentState = ArenaBoutState.PreMatch;
+        private ArenaBoutState currentState = ArenaBoutState.Idle;
+        [SerializeField] private Vector3 challengerRingPosition = new Vector3(-0.5f, 0f, 0f);
+        [SerializeField] private Vector3 concourseSpawnPosition = new Vector3(-6.8f, -1.0f, 0f);
+        [SerializeField] private GameObject ringGateBarrier;
         private Vector3 playerStartPos;
         private Vector3 gladiatorStartPos;
 
@@ -50,6 +54,8 @@ namespace BeastClad.Arena
         public SanctionedGladiatorAI2D Gladiator => gladiator;
         public PlayerStatsComponent PlayerStats => playerStats;
         public int PrizePurse => prizePurseCredits;
+        public Vector3 ConcourseSpawnPosition => concourseSpawnPosition;
+        public GameObject RingGateBarrier => ringGateBarrier;
 
         public event Action<ArenaBoutState> OnStateChanged;
         public event Action<int> OnCountdownTick;
@@ -98,12 +104,85 @@ namespace BeastClad.Arena
             if (playerStats != null) playerStartPos = playerStats.transform.position;
             if (gladiator != null) gladiatorStartPos = gladiator.transform.position;
 
+            ResetToIdleState();
+        }
+
+        public void SetRingGateBarrier(GameObject barrier)
+        {
+            ringGateBarrier = barrier;
+            UpdateGateBarrier();
+        }
+
+        private void UpdateGateBarrier()
+        {
+            if (ringGateBarrier != null)
+            {
+                bool closeGate = (currentState == ArenaBoutState.PreMatch || currentState == ArenaBoutState.ActiveBout);
+                ringGateBarrier.SetActive(closeGate);
+            }
+        }
+
+        public void ResetToIdleState()
+        {
+            StopAllCoroutines();
+            CancelInvoke();
+            currentState = ArenaBoutState.Idle;
+            UpdateGateBarrier();
+            OnStateChanged?.Invoke(currentState);
+
+            var pCtrl = playerStats != null ? playerStats.GetComponent<PlayerController2D>() : null;
+            var pInfuse = playerStats != null ? playerStats.GetComponent<PlayerInfuseManager>() : null;
+            if (pCtrl != null) pCtrl.SetMovementLocked(false);
+            if (pInfuse != null) pInfuse.SetCombatEnabled(false);
+            if (gladiator != null)
+            {
+                gladiator.EnableCombat(false);
+                gladiator.ResetGladiator(gladiatorStartPos);
+            }
+        }
+
+        public void StartBout()
+        {
+            if (currentState == ArenaBoutState.PreMatch || currentState == ArenaBoutState.ActiveBout)
+            {
+                Debug.LogWarning("[ArenaBoutController] Bout is already active!");
+                return;
+            }
+
+            StopAllCoroutines();
+            CancelInvoke();
+
+            if (playerStats != null)
+            {
+                Vector3 spawnPos = challengerRingPosition != Vector3.zero ? challengerRingPosition : playerStartPos;
+                playerStats.transform.position = spawnPos;
+                var rb = playerStats.GetComponent<Rigidbody2D>();
+                if (rb != null) rb.position = spawnPos;
+                Physics2D.SyncTransforms();
+
+                playerStats.ResetHealth();
+                var pCtrl = playerStats.GetComponent<PlayerController2D>();
+                if (pCtrl != null)
+                {
+                    pCtrl.SetFacingDirection(Vector2.right);
+                    pCtrl.SetMovementLocked(true);
+                }
+            }
+
+            if (gladiator != null)
+            {
+                gladiator.ResetGladiator(gladiatorStartPos);
+                gladiator.EnableCombat(false);
+            }
+
+            UpdateGateBarrier();
             StartCoroutine(BoutCountdownRoutine());
         }
 
         private IEnumerator BoutCountdownRoutine()
         {
             currentState = ArenaBoutState.PreMatch;
+            UpdateGateBarrier();
             OnStateChanged?.Invoke(currentState);
 
             var pCtrl = playerStats != null ? playerStats.GetComponent<PlayerController2D>() : null;
@@ -123,6 +202,7 @@ namespace BeastClad.Arena
             // Fight!
             OnCountdownTick?.Invoke(0);
             currentState = ArenaBoutState.ActiveBout;
+            UpdateGateBarrier();
             OnStateChanged?.Invoke(currentState);
 
             if (pCtrl != null) pCtrl.SetMovementLocked(false);
@@ -137,19 +217,25 @@ namespace BeastClad.Arena
 
         private void HandleGladiatorDefeated(SanctionedGladiatorAI2D defeatedGladiator)
         {
-            if (currentState != ArenaBoutState.ActiveBout) return;
+            if (currentState != ArenaBoutState.ActiveBout && currentState != ArenaBoutState.PreMatch) return;
 
             currentState = ArenaBoutState.Victory;
+            UpdateGateBarrier();
             OnStateChanged?.Invoke(currentState);
 
-            // Lock player movement and combat upon victory celebration
+            // Lock player movement and combat briefly upon victory celebration
             var pCtrl = playerStats != null ? playerStats.GetComponent<PlayerController2D>() : null;
             var pInfuse = playerStats != null ? playerStats.GetComponent<PlayerInfuseManager>() : null;
             if (pCtrl != null) pCtrl.SetMovementLocked(true);
             if (pInfuse != null) pInfuse.SetCombatEnabled(false);
 
-            // Re-enable concourse movement after the victory fanfare so player can visit kiosks
-            Invoke(nameof(UnlockPostMatchMovement), 2.0f);
+            if (playerStats != null)
+            {
+                playerStats.ResetHealth();
+            }
+
+            // Re-enable movement after short celebration
+            Invoke(nameof(UnlockPostMatchMovement), 1.2f);
 
             // Award prize purse
             if (playerWallet != null)
@@ -185,6 +271,7 @@ namespace BeastClad.Arena
             if (currentState != ArenaBoutState.ActiveBout) return;
 
             currentState = ArenaBoutState.Defeat;
+            UpdateGateBarrier();
             OnStateChanged?.Invoke(currentState);
 
             // Lock player movement and combat upon defeat
@@ -201,6 +288,74 @@ namespace BeastClad.Arena
             Debug.Log("<color=#FF4444>[Arena Defeat]</color> Player was knocked out! Bout terminated.");
             OnMatchConcluded?.Invoke(false, 0, CurrentRank);
             Persistence.SaveManager.Instance.SaveCurrentGame();
+
+            StartCoroutine(PostDefeatRecoveryRoutine());
+        }
+
+        private IEnumerator PostDefeatRecoveryRoutine()
+        {
+            yield return new WaitForSeconds(2.0f);
+            if (playerStats != null)
+            {
+                playerStats.ResetHealth();
+            }
+            UpdateGateBarrier();
+            Debug.Log("<color=#00FFAA>[Arena Medic]</color> Player stabilized.");
+        }
+
+        /// <summary>
+        /// Moves player back to the concourse staging area, restores health, resets bout state to Idle,
+        /// and unlocks movement so they can access the vendor, attendant, or exit portal.
+        /// </summary>
+        public void ReturnToConcourse()
+        {
+            StopAllCoroutines();
+            CancelInvoke();
+
+            Vector3 targetPos = concourseSpawnPosition != Vector3.zero ? concourseSpawnPosition : playerStartPos;
+            if (playerStats != null)
+            {
+                playerStats.transform.position = targetPos;
+                var rb = playerStats.GetComponent<Rigidbody2D>();
+                if (rb != null) rb.position = targetPos;
+                Physics2D.SyncTransforms();
+
+                playerStats.ResetHealth();
+                var pCtrl = playerStats.GetComponent<PlayerController2D>();
+                if (pCtrl != null)
+                {
+                    pCtrl.SetMovementLocked(false);
+                    pCtrl.SetFacingDirection(Vector2.right);
+                }
+                var pInfuse = playerStats.GetComponent<PlayerInfuseManager>();
+                if (pInfuse != null) pInfuse.SetCombatEnabled(false);
+            }
+
+            ResetToIdleState();
+            Debug.Log("<color=#00FFAA>[Arena Concourse]</color> Player returned to staging concourse.");
+        }
+
+        /// <summary>
+        /// Starts the next tournament battle, healing the player and restarting the ring countdown.
+        /// </summary>
+        public void StartNextBout()
+        {
+            StartBout();
+        }
+
+        /// <summary>
+        /// Transitions directly from the arena back to the Central District Hub.
+        /// </summary>
+        public void ExitToCentralHub()
+        {
+            if (World.SceneTransitionManager.Instance != null)
+            {
+                World.SceneTransitionManager.Instance.TransitionToScene("District_CentralHub", "Spawn_FromArena");
+            }
+            else
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene("District_CentralHub");
+            }
         }
 
         public void SetRankIndex(int index)
@@ -210,20 +365,7 @@ namespace BeastClad.Arena
 
         public void RestartBout()
         {
-            StopAllCoroutines();
-
-            if (playerStats != null)
-            {
-                playerStats.transform.position = playerStartPos;
-                playerStats.ResetHealth();
-            }
-
-            if (gladiator != null)
-            {
-                gladiator.ResetGladiator(gladiatorStartPos);
-            }
-
-            StartCoroutine(BoutCountdownRoutine());
+            StartBout();
         }
 
         public void SetReferences(PlayerStatsComponent stats, PlayerWallet wallet, SanctionedGladiatorAI2D glad)

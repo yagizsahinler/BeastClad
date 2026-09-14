@@ -35,6 +35,7 @@ namespace BeastClad.Editor
             Sprite bgSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
             Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             VolumeProfile volumeProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>("Assets/Settings/DefaultVolumeProfile.asset");
+            GameObject ringBarrierObj = null;
 
             // ==========================================
             // 1. CAMERA & POST-PROCESSING
@@ -168,7 +169,24 @@ namespace BeastClad.Editor
             CreateVisibleWall(boundsObj.transform, "Wall_North", new Vector2(0f, 5.5f), new Vector2(14.8f, 0.8f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
             CreateVisibleWall(boundsObj.transform, "Wall_South", new Vector2(0f, -5.5f), new Vector2(14.8f, 0.8f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
             CreateVisibleWall(boundsObj.transform, "Wall_East", new Vector2(7.2f, 0f), new Vector2(0.8f, 11.8f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
-            CreateVisibleWall(boundsObj.transform, "Wall_West", new Vector2(-7.2f, 0f), new Vector2(0.8f, 11.8f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
+
+            // West wall is split into North and South wings to provide an open gateway through the Municipal Archway
+            CreateVisibleWall(boundsObj.transform, "Wall_West_North", new Vector2(-7.2f, 3.8f), new Vector2(0.8f, 4.2f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
+            CreateVisibleWall(boundsObj.transform, "Wall_West_South", new Vector2(-7.2f, -3.8f), new Vector2(0.8f, 4.2f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
+
+            // Dynamic Ring Gate Barrier across central opening (sealed during combat, open during Idle & Post-Match)
+            ringBarrierObj = new GameObject("RingGateBarrier");
+            ringBarrierObj.transform.SetParent(boundsObj.transform, false);
+            ringBarrierObj.transform.localPosition = new Vector2(-7.2f, 0f);
+            var bcol = ringBarrierObj.AddComponent<BoxCollider2D>();
+            bcol.size = new Vector2(0.8f, 3.4f);
+            var bsr = ringBarrierObj.AddComponent<SpriteRenderer>();
+            bsr.sprite = uisprite;
+            bsr.drawMode = SpriteDrawMode.Sliced;
+            bsr.size = new Vector2(0.8f, 3.4f);
+            bsr.color = new Color(0.9f, 0.18f, 0.18f, 0.75f); // Red energy barrier
+            bsr.sortingOrder = 5;
+            ringBarrierObj.SetActive(false); // Initially open in Idle
 
             // ==========================================
             // 5. AEGIS CORPORATE COMMERCE KIOSK
@@ -290,7 +308,41 @@ namespace BeastClad.Editor
             spSO.ApplyModifiedProperties();
 
             // ==========================================
-            // 8. GLADIATOR VALERIUS & BOUT CONTROLLER
+            // 8. ARENA ATTENDANT (PROCTOR CASSIAN)
+            // ==========================================
+            var attendantDeskObj = new GameObject("ArenaAttendantStation");
+            attendantDeskObj.transform.SetParent(envRoot.transform);
+            attendantDeskObj.transform.position = new Vector3(-2.8f, -2.4f, 0f);
+
+            CreateSpriteObject(attendantDeskObj.transform, "DeskPodium", uisprite,
+                Vector3.zero, new Vector2(3.6f, 1.8f),
+                new Color(0.14f, 0.12f, 0.10f, 1f), 2);
+            CreateSpriteObject(attendantDeskObj.transform, "DeskBorder", uisprite,
+                Vector3.zero, new Vector2(3.8f, 2.0f),
+                new Color(1f, 0.85f, 0.2f, 1f), 1);
+
+            CreateWorldSign(attendantDeskObj.transform, "Sign_Attendant", new Vector3(0f, 1.4f, 0f),
+                "PROCTOR CASSIAN", new Color(1f, 0.85f, 0.2f, 1f),
+                "[COLOSSEUM MATCH REGISTRAR]", new Color(0.85f, 0.95f, 1f, 1f));
+
+            var attendantObj = new GameObject("ArenaAttendant_ProctorCassian");
+            attendantObj.transform.SetParent(attendantDeskObj.transform, false);
+            attendantObj.transform.localPosition = new Vector3(0f, 0.2f, 0f);
+
+            var attSr = attendantObj.AddComponent<SpriteRenderer>();
+            attSr.sprite = knob;
+            attSr.color = new Color(1f, 0.85f, 0.3f, 1f); // Roman official gold
+            attendantObj.transform.localScale = new Vector3(6.5f, 6.5f, 1f);
+            attSr.sortingOrder = 3;
+
+            var attCol = attendantObj.AddComponent<CircleCollider2D>();
+            attCol.isTrigger = true;
+            attCol.radius = 2.4f / 6.5f;
+
+            attendantObj.AddComponent<ArenaAttendantNPC>();
+
+            // ==========================================
+            // 9. GLADIATOR VALERIUS & BOUT CONTROLLER
             // ==========================================
             var gladObj = new GameObject("Gladiator_Valerius");
             gladObj.transform.position = new Vector3(5.5f, 0f, 0f);
@@ -324,7 +376,7 @@ namespace BeastClad.Editor
             var boutCtrl = boutObj.AddComponent<ArenaBoutController>();
 
             // ==========================================
-            // 9. PLAYER SETUP
+            // 10. PLAYER SETUP
             // ==========================================
             var playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player.prefab");
             GameObject playerObj;
@@ -333,14 +385,14 @@ namespace BeastClad.Editor
                 playerObj = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
                 playerObj.name = "Player";
                 playerObj.tag = "Player";
-                playerObj.transform.position = new Vector3(-0.5f, 0f, 0f);
+                playerObj.transform.position = new Vector3(-6.8f, -1.0f, 0f);
             }
             else
             {
                 playerObj = new GameObject("Player");
                 playerObj.name = "Player";
                 playerObj.tag = "Player";
-                playerObj.transform.position = new Vector3(-0.5f, 0f, 0f);
+                playerObj.transform.position = new Vector3(-6.8f, -1.0f, 0f);
                 playerObj.AddComponent<SpriteRenderer>().sprite = knob;
                 playerObj.AddComponent<Rigidbody2D>().gravityScale = 0f;
                 playerObj.AddComponent<CapsuleCollider2D>();
@@ -361,6 +413,9 @@ namespace BeastClad.Editor
             boutSO.FindProperty("playerStats").objectReferenceValue = pStats;
             boutSO.FindProperty("playerWallet").objectReferenceValue = pWallet;
             boutSO.FindProperty("gladiator").objectReferenceValue = gladAI;
+            boutSO.FindProperty("challengerRingPosition").vector3Value = new Vector3(-0.5f, 0f, 0f);
+            boutSO.FindProperty("concourseSpawnPosition").vector3Value = new Vector3(-6.8f, -1.0f, 0f);
+            boutSO.FindProperty("ringGateBarrier").objectReferenceValue = ringBarrierObj;
             boutSO.ApplyModifiedProperties();
 
             // ==========================================
@@ -392,7 +447,13 @@ namespace BeastClad.Editor
             // Wallet HUD UI (Top-Right)
             BuildWalletHUD(canvasObj.transform, defaultFont, uisprite);
 
-            // Arena Match HUD UI (Boss bar, announcer banner, ladder rank)
+            // Dynamic Player Health Bar HUD (Top-Left)
+            var healthHudObj = new GameObject("PlayerHealthHUD", typeof(RectTransform));
+            healthHudObj.transform.SetParent(canvasObj.transform, false);
+            var healthHUD = healthHudObj.AddComponent<PlayerHealthHUD>();
+            healthHUD.EnsureUIHierarchy();
+
+            // Arena Match HUD UI (Boss bar, announcer banner, ladder rank, attendant modal)
             BuildArenaMatchUI(canvasObj.transform, boutCtrl, defaultFont, uisprite, bgSprite);
 
             // Corporate Vendor UI (Aegis Kiosk modal)
@@ -638,25 +699,229 @@ namespace BeastClad.Editor
                 new Vector2(0f, 0f), new Vector2(1f, 0.45f), Vector2.zero, Vector2.zero,
                 Color.white, "DEFEAT YOUR OPPONENT");
 
-            // 3. Division Ladder Badge (Top Left)
+            // 3. Division Ladder Badge (Top Left, positioned neatly below PlayerHealthHUD)
             var ladderObj = new GameObject("DivisionLadderBadge");
             ladderObj.transform.SetParent(matchRoot.transform, false);
             var lrt = ladderObj.AddComponent<RectTransform>();
             lrt.anchorMin = new Vector2(0f, 1f);
             lrt.anchorMax = new Vector2(0f, 1f);
             lrt.pivot = new Vector2(0f, 1f);
-            lrt.anchoredPosition = new Vector2(30f, -30f);
-            lrt.sizeDelta = new Vector2(300f, 60f);
+            lrt.anchoredPosition = new Vector2(30f, -92f);
+            lrt.sizeDelta = new Vector2(330f, 48f);
 
             var lbg = ladderObj.AddComponent<Image>();
             lbg.sprite = uisprite;
             lbg.color = new Color(0.08f, 0.10f, 0.14f, 0.94f);
 
-            var ladderTxt = CreateText(ladderObj.transform, "DivisionRankText", font, 24, FontStyle.Bold, TextAnchor.MiddleCenter,
+            var ladderTxt = CreateText(ladderObj.transform, "DivisionRankText", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
                 new Color(1f, 0.85f, 0.2f, 1f), "<b>DIVISION:</b> Bronze III");
 
             bannerObj.SetActive(false);
+
+            // 4. Attendant Interaction Prompt Panel
+            var attPromptObj = new GameObject("AttendantPromptPanel");
+            attPromptObj.transform.SetParent(matchRoot.transform, false);
+            var aprt = attPromptObj.AddComponent<RectTransform>();
+            aprt.anchorMin = new Vector2(0.5f, 0.16f);
+            aprt.anchorMax = new Vector2(0.5f, 0.16f);
+            aprt.pivot = new Vector2(0.5f, 0.5f);
+            aprt.sizeDelta = new Vector2(640f, 60f);
+
+            var apbg = attPromptObj.AddComponent<Image>();
+            apbg.sprite = uisprite;
+            apbg.color = new Color(0.08f, 0.06f, 0.04f, 0.95f);
+            apbg.raycastTarget = false;
+
+            var aptxt = CreateText(attPromptObj.transform, "PromptText", font, 24, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                new Color(1f, 0.85f, 0.2f, 1f), "[ F ] Talk to Arena Attendant (Register for Bout)");
+            attPromptObj.SetActive(false);
+
+            // 5. Attendant Registration Modal Panel
+            var modalObj = new GameObject("RegistrationModalPanel");
+            modalObj.transform.SetParent(matchRoot.transform, false);
+            var mort = modalObj.AddComponent<RectTransform>();
+            mort.anchorMin = new Vector2(0.5f, 0.5f);
+            mort.anchorMax = new Vector2(0.5f, 0.5f);
+            mort.pivot = new Vector2(0.5f, 0.5f);
+            mort.sizeDelta = new Vector2(740f, 440f);
+
+            var mbg = modalObj.AddComponent<Image>();
+            mbg.sprite = uisprite;
+            mbg.color = new Color(0.08f, 0.06f, 0.04f, 0.98f);
+
+            CreateSpriteObject(modalObj.transform, "ModalGoldBorder", uisprite,
+                Vector3.zero, new Vector2(744f, 444f),
+                new Color(1f, 0.85f, 0.25f, 1f), -1);
+
+            var mTitle = CreateText(modalObj.transform, "ModalTitle", font, 26, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.96f), Vector2.zero, Vector2.zero,
+                new Color(1f, 0.85f, 0.2f, 1f), "AEGIS GRAND COLOSSEUM // MATCH REGISTRAR");
+
+            var mDialogue = CreateText(modalObj.transform, "ModalDialogue", font, 19, FontStyle.Italic, TextAnchor.MiddleCenter,
+                new Vector2(0.06f, 0.58f), new Vector2(0.94f, 0.82f), Vector2.zero, Vector2.zero,
+                new Color(0.9f, 0.95f, 1f, 1f),
+                "\"Greetings, Challenger. Your biometric profile and armor permits are in order. Are you ready to enter the arena sands for your sanctioned bout against Valerius?\"");
+
+            var cardObj = new GameObject("OpponentCard");
+            cardObj.transform.SetParent(modalObj.transform, false);
+            var crt = cardObj.AddComponent<RectTransform>();
+            crt.anchorMin = new Vector2(0.08f, 0.30f);
+            crt.anchorMax = new Vector2(0.92f, 0.56f);
+            crt.sizeDelta = Vector2.zero;
+            var cbg = cardObj.AddComponent<Image>();
+            cbg.sprite = uisprite;
+            cbg.color = new Color(0.14f, 0.10f, 0.08f, 0.9f);
+
+            var oppInfo = CreateText(cardObj.transform, "OpponentInfo", font, 19, FontStyle.Bold, TextAnchor.MiddleLeft,
+                new Vector2(0.05f, 0.1f), new Vector2(0.55f, 0.9f), Vector2.zero, Vector2.zero,
+                Color.white, "Opponent: Valerius the Shock-Lancer\nSponsor: Aegis-Fauna Corp");
+
+            var standingInfo = CreateText(cardObj.transform, "StandingInfo", font, 17, FontStyle.Bold, TextAnchor.MiddleRight,
+                new Vector2(0.55f, 0.5f), new Vector2(0.95f, 0.9f), Vector2.zero, Vector2.zero,
+                new Color(0.2f, 0.9f, 1f, 1f), "Division Standing: Bronze League - Rank III");
+
+            var purseInfo = CreateText(cardObj.transform, "PurseInfo", font, 17, FontStyle.Bold, TextAnchor.MiddleRight,
+                new Vector2(0.55f, 0.1f), new Vector2(0.95f, 0.5f), Vector2.zero, Vector2.zero,
+                new Color(1f, 0.85f, 0.2f, 1f), "Sanctioned Purse: +500 Credits");
+
+            // Buttons: Enter Ring & Close
+            var enterBtnObj = new GameObject("Btn_EnterRing");
+            enterBtnObj.transform.SetParent(modalObj.transform, false);
+            var ebrt = enterBtnObj.AddComponent<RectTransform>();
+            ebrt.anchorMin = new Vector2(0.12f, 0.08f);
+            ebrt.anchorMax = new Vector2(0.56f, 0.24f);
+            ebrt.sizeDelta = Vector2.zero;
+            var ebImg = enterBtnObj.AddComponent<Image>();
+            ebImg.sprite = uisprite;
+            ebImg.color = new Color(0.12f, 0.65f, 0.35f, 1f);
+            var enterBtn = enterBtnObj.AddComponent<Button>();
+            CreateText(enterBtnObj.transform, "BtnText", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                Color.white, "ENTER THE RING [ENTER]");
+
+            var closeBtnObj = new GameObject("Btn_NotReady");
+            closeBtnObj.transform.SetParent(modalObj.transform, false);
+            var cbrt = closeBtnObj.AddComponent<RectTransform>();
+            cbrt.anchorMin = new Vector2(0.60f, 0.08f);
+            cbrt.anchorMax = new Vector2(0.88f, 0.24f);
+            cbrt.sizeDelta = Vector2.zero;
+            var cbImg = closeBtnObj.AddComponent<Image>();
+            cbImg.sprite = uisprite;
+            cbImg.color = new Color(0.55f, 0.18f, 0.18f, 1f);
+            var closeBtn = closeBtnObj.AddComponent<Button>();
+            CreateText(closeBtnObj.transform, "BtnText", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                Color.white, "NOT READY [ESC]");
+
+            modalObj.SetActive(false);
+
+            // 6. Post-Match Outcome Modal Panel
+            var outcomeObj = new GameObject("OutcomeModalPanel", typeof(RectTransform));
+            outcomeObj.transform.SetParent(matchRoot.transform, false);
+            var ocrt = outcomeObj.GetComponent<RectTransform>();
+            ocrt.anchorMin = new Vector2(0.5f, 0.5f);
+            ocrt.anchorMax = new Vector2(0.5f, 0.5f);
+            ocrt.pivot = new Vector2(0.5f, 0.5f);
+            ocrt.sizeDelta = new Vector2(800f, 480f);
+
+            var ocbg = outcomeObj.AddComponent<Image>();
+            ocbg.sprite = uisprite;
+            ocbg.color = new Color(0.06f, 0.05f, 0.03f, 0.98f);
+
+            CreateSpriteObject(outcomeObj.transform, "OutcomeGoldBorder", uisprite,
+                Vector3.zero, new Vector2(804f, 484f),
+                new Color(1f, 0.85f, 0.25f, 1f), -1);
+
+            var ocTitle = CreateText(outcomeObj.transform, "OutcomeTitle", font, 32, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.96f), Vector2.zero, Vector2.zero,
+                new Color(1f, 0.85f, 0.2f, 1f), "VICTORY!");
+
+            var ocSubtitle = CreateText(outcomeObj.transform, "OutcomeSubtitle", font, 18, FontStyle.Italic, TextAnchor.MiddleCenter,
+                new Vector2(0.06f, 0.72f), new Vector2(0.94f, 0.82f), Vector2.zero, Vector2.zero,
+                new Color(0.85f, 0.92f, 1f, 1f), "SANCTIONED TOURNAMENT BOUT CONCLUDED");
+
+            // Stats / Rewards Card
+            var ocCardObj = new GameObject("OutcomeStatsCard", typeof(RectTransform));
+            ocCardObj.transform.SetParent(outcomeObj.transform, false);
+            var occrt = ocCardObj.GetComponent<RectTransform>();
+            occrt.anchorMin = new Vector2(0.08f, 0.32f);
+            occrt.anchorMax = new Vector2(0.92f, 0.68f);
+            occrt.sizeDelta = Vector2.zero;
+            var occbg = ocCardObj.AddComponent<Image>();
+            occbg.sprite = uisprite;
+            occbg.color = new Color(0.12f, 0.09f, 0.07f, 0.9f);
+
+            var ocStanding = CreateText(ocCardObj.transform, "StandingInfo", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.92f), Vector2.zero, Vector2.zero,
+                new Color(0.2f, 0.9f, 1f, 1f), "Division Standing: Bronze League - Rank II");
+
+            var ocRewards = CreateText(ocCardObj.transform, "RewardsInfo", font, 20, FontStyle.Bold, TextAnchor.MiddleCenter,
+                new Vector2(0.05f, 0.08f), new Vector2(0.95f, 0.48f), Vector2.zero, Vector2.zero,
+                new Color(1f, 0.85f, 0.2f, 1f), "Prize Purse Awarded: +500 Credits");
+
+            // Button 1: Proceed to Next Bout
+            var nextBtnObj = new GameObject("Btn_NextBout", typeof(RectTransform));
+            nextBtnObj.transform.SetParent(outcomeObj.transform, false);
+            var nbrt = nextBtnObj.GetComponent<RectTransform>();
+            nbrt.anchorMin = new Vector2(0.05f, 0.08f);
+            nbrt.anchorMax = new Vector2(0.34f, 0.24f);
+            nbrt.sizeDelta = Vector2.zero;
+            var nbImg = nextBtnObj.AddComponent<Image>();
+            nbImg.sprite = uisprite;
+            nbImg.color = new Color(0.10f, 0.62f, 0.36f, 1f); // Emerald
+            var nextBtn = nextBtnObj.AddComponent<Button>();
+            var nextBtnTxt = CreateText(nextBtnObj.transform, "BtnText", font, 16, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                Color.white, "NEXT BOUT [ENTER]");
+
+            // Button 2: Exit to Concourse
+            var concourseBtnObj = new GameObject("Btn_ExitToConcourse", typeof(RectTransform));
+            concourseBtnObj.transform.SetParent(outcomeObj.transform, false);
+            var concrt = concourseBtnObj.GetComponent<RectTransform>();
+            concrt.anchorMin = new Vector2(0.36f, 0.08f);
+            concrt.anchorMax = new Vector2(0.65f, 0.24f);
+            concrt.sizeDelta = Vector2.zero;
+            var concImg = concourseBtnObj.AddComponent<Image>();
+            concImg.sprite = uisprite;
+            concImg.color = new Color(0.08f, 0.48f, 0.78f, 1f); // Sky Cyan / Blue
+            var concourseBtn = concourseBtnObj.AddComponent<Button>();
+            CreateText(concourseBtnObj.transform, "BtnText", font, 16, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                Color.white, "CONCOURSE [ESC]");
+
+            // Button 3: Exit Arena (Return to Central Hub)
+            var exitHubBtnObj = new GameObject("Btn_ExitToHub", typeof(RectTransform));
+            exitHubBtnObj.transform.SetParent(outcomeObj.transform, false);
+            var ehbrt = exitHubBtnObj.GetComponent<RectTransform>();
+            ehbrt.anchorMin = new Vector2(0.67f, 0.08f);
+            ehbrt.anchorMax = new Vector2(0.95f, 0.24f);
+            ehbrt.sizeDelta = Vector2.zero;
+            var ehbImg = exitHubBtnObj.AddComponent<Image>();
+            ehbImg.sprite = uisprite;
+            ehbImg.color = new Color(0.48f, 0.32f, 0.15f, 1f); // Bronze / Amber
+            var exitHubBtn = exitHubBtnObj.AddComponent<Button>();
+            CreateText(exitHubBtnObj.transform, "BtnText", font, 16, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                Color.white, "DEPART ARENA");
+
+            // Close [X] Button
+            var closeOutcomeBtnObj = new GameObject("Btn_CloseOutcome", typeof(RectTransform));
+            closeOutcomeBtnObj.transform.SetParent(outcomeObj.transform, false);
+            var cobrt = closeOutcomeBtnObj.GetComponent<RectTransform>();
+            cobrt.anchorMin = new Vector2(0.92f, 0.88f);
+            cobrt.anchorMax = new Vector2(0.97f, 0.96f);
+            cobrt.sizeDelta = Vector2.zero;
+            var cobImg = closeOutcomeBtnObj.AddComponent<Image>();
+            cobImg.sprite = uisprite;
+            cobImg.color = new Color(0.55f, 0.15f, 0.15f, 1f);
+            var closeOutcomeBtn = closeOutcomeBtnObj.AddComponent<Button>();
+            CreateText(closeOutcomeBtnObj.transform, "BtnText", font, 18, FontStyle.Bold, TextAnchor.MiddleCenter,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                Color.white, "✕");
+
+            outcomeObj.SetActive(false);
 
             var mso = new SerializedObject(matchUI);
             if (boutCtrl != null) mso.FindProperty("boutController").objectReferenceValue = boutCtrl;
@@ -669,6 +934,29 @@ namespace BeastClad.Editor
             mso.FindProperty("announcerMainText").objectReferenceValue = mainTxt;
             mso.FindProperty("announcerSubText").objectReferenceValue = subAnnounceTxt;
             mso.FindProperty("divisionRankText").objectReferenceValue = ladderTxt;
+
+            mso.FindProperty("attendantPromptPanel").objectReferenceValue = attPromptObj;
+            mso.FindProperty("attendantPromptText").objectReferenceValue = aptxt;
+            mso.FindProperty("registrationModalPanel").objectReferenceValue = modalObj;
+            mso.FindProperty("modalTitleText").objectReferenceValue = mTitle;
+            mso.FindProperty("modalDialogueText").objectReferenceValue = mDialogue;
+            mso.FindProperty("modalOpponentInfoText").objectReferenceValue = oppInfo;
+            mso.FindProperty("modalStandingText").objectReferenceValue = standingInfo;
+            mso.FindProperty("modalPurseText").objectReferenceValue = purseInfo;
+            mso.FindProperty("enterRingButton").objectReferenceValue = enterBtn;
+            mso.FindProperty("closeModalButton").objectReferenceValue = closeBtn;
+
+            mso.FindProperty("outcomeModalPanel").objectReferenceValue = outcomeObj;
+            mso.FindProperty("outcomeTitleText").objectReferenceValue = ocTitle;
+            mso.FindProperty("outcomeSubtitleText").objectReferenceValue = ocSubtitle;
+            mso.FindProperty("outcomeStandingText").objectReferenceValue = ocStanding;
+            mso.FindProperty("outcomeRewardsText").objectReferenceValue = ocRewards;
+            mso.FindProperty("nextBoutButton").objectReferenceValue = nextBtn;
+            mso.FindProperty("nextBoutButtonText").objectReferenceValue = nextBtnTxt;
+            mso.FindProperty("exitToConcourseButton").objectReferenceValue = concourseBtn;
+            mso.FindProperty("leaveArenaButton").objectReferenceValue = exitHubBtn;
+            mso.FindProperty("closeOutcomeModalButton").objectReferenceValue = closeOutcomeBtn;
+
             mso.ApplyModifiedProperties();
         }
 

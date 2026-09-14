@@ -256,6 +256,8 @@ namespace BeastClad.Player
         /// </summary>
         private void SetVelocity(Vector2 vel)
         {
+            if (rb == null) rb = GetComponent<Rigidbody2D>();
+            if (rb == null) return;
 #if UNITY_6000_0_OR_NEWER
             rb.linearVelocity = vel;
 #else

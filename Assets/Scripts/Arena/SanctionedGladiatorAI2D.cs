@@ -348,6 +348,8 @@ namespace BeastClad.Arena
 
         private void SetVelocity(Vector2 vel)
         {
+            if (rb == null) rb = GetComponent<Rigidbody2D>();
+            if (rb == null) return;
 #if UNITY_6000_0_OR_NEWER
             rb.linearVelocity = vel;
 #else
@@ -377,8 +379,9 @@ namespace BeastClad.Arena
 
         public void ResetGladiator(Vector3 spawnPosition)
         {
+            if (rb == null) rb = GetComponent<Rigidbody2D>();
             transform.position = spawnPosition;
-            rb.position = spawnPosition;
+            if (rb != null) rb.position = spawnPosition;
             currentHealth = maxHealth;
             currentState = GladiatorAIState.Inactive;
             SetVelocity(Vector2.zero);

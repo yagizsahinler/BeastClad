@@ -111,11 +111,13 @@
   - [x] Implement Municipal Security Quarantine Locker and Quick-Disarm (`[E]` / `[F]`) at checkpoint to safely unequip and vault contraband before entering tournament arena.
   - [x] Comprehensive visual refinement and quality overhaul across all 4 scenes (Colosseum amphitheater, Outlands woodland biome, Cyberpunk Undercity, and Central Transit Concourse) with URP 2D lighting and post-processing volumes.
 
-- [x] **5.2 Persistent Save & Load System (JSON)**
+- [x] **5.2 Persistent Save & Load System (JSON) & Combat Experience Polish**
   - [x] Design robust, serializable Save Data contracts (`PlayerSaveData`: Credits, Roster Monsters, Equipped Slots, Arena Rank, Story Flags).
   - [x] Implement atomic file I/O `SaveManager` service writing to `Application.persistentDataPath/savegame.json`.
   - [x] Implement auto-save triggers on scene transitions, kiosk purchases, capture events, and match conclusions.
   - [x] Provide load-game initialization on startup with graceful fallback to fresh defaults if no save file is detected.
+  - [x] **Arena Concourse Attendant Bout Gating:** Gated Colosseum bout initiation behind Proctor Cassian (Match Registrar NPC). Added `ArenaBoutState.Idle` state; opponent stays inactive in the ring while player freely explores concourse and Aegis Kiosk; talking to attendant opens bout registration modal; confirming teleports challenger to ring and triggers countdown.
+  - [x] **Dynamic Player Health Bar HUD:** Created modular, fading `PlayerHealthHUD` (hidden at peace with alpha = 0.0, automatically fades in upon taking damage, executing attack skills, nearby hostiles, or active tournament/pit bouts). Features 3-tier adaptive color thresholds (Emerald, Amber, Crimson) and trailing damage lag catchup bar. Integrated into both `Arena_Colosseum` and `HUD_Canvas.prefab`.
 
 - [ ] **5.3 Dedicated Roster & Infuse Management UI**
   - [ ] Build full-screen / modal Roster & Infuse management window toggled via `[Tab]` or `[I]`.
@@ -129,7 +131,9 @@
 
 | ID | Phase | Description | Status | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| *None logged yet* | — | All reported underground issues resolved and verified. | Resolved | Fixed collider scales, brawler radius, HUD canvas, and hub combat gating. |
+| BUG-001 | 3.1 / 5.2 | Arena countdown and gladiator movement triggered automatically on scene entry before registering with official. | Resolved | Added `ArenaBoutState.Idle`, Proctor Cassian attendant station, and registration modal confirmation gating. |
+| BUG-002 | 1.1 / 5.2 | Player lacked a visible health indicator during combat encounters. | Resolved | Created dynamic `PlayerHealthHUD` with combat detection, alpha fading, color tiers, and lag catchup bar. |
+| BUG-003 | 3.1 / 5.2 | Unable to exit arena or proceed to a new battle after winning a bout in Legal Arena. | Resolved | Added Post-Match Outcome Modal ("Next Bout", "Exit to Concourse", "Depart Arena"), split West wall to create archway, and added dynamic RingGateBarrier. |
 
 ---
 
