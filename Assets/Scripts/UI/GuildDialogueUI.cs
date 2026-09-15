@@ -27,6 +27,8 @@ namespace BeastClad.UI
         [SerializeField] private Text rewardSummaryText;
         [SerializeField] private Text footerHintText;
 
+        public bool IsDialogueOpen => dialogueModalPanel != null && dialogueModalPanel.activeSelf;
+
         private void Awake()
         {
             if (interactionPromptPanel != null) interactionPromptPanel.SetActive(false);

@@ -45,6 +45,8 @@ namespace BeastClad.UI
         private RipperdocVendor activeVendor;
         private int currentIndex = 0;
 
+        public bool IsOpen => modalPanel != null && modalPanel.activeSelf;
+
         private void Awake()
         {
             if (promptPanel != null) promptPanel.SetActive(false);

@@ -444,6 +444,13 @@ namespace BeastClad.Editor
                 canvasObj.AddComponent<LimbCooldownUI>();
             }
 
+            if (canvasObj.GetComponent<PauseMenuUI>() == null)
+            {
+                var pauseUI = canvasObj.AddComponent<PauseMenuUI>();
+                pauseUI.BuildRuntimeHierarchy();
+                pauseUI.EnsureUIHierarchy();
+            }
+
             // Wallet HUD UI (Top-Right)
             BuildWalletHUD(canvasObj.transform, defaultFont, uisprite);
 

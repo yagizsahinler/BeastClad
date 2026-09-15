@@ -55,6 +55,10 @@ namespace BeastClad.UI
         private int selectedWager = 250;
         private PlayerWallet cachedWallet;
 
+        public bool IsWagerModalOpen => wagerModalPanel != null && wagerModalPanel.activeSelf;
+        public bool IsOutcomeModalOpen => outcomeModalPanel != null && outcomeModalPanel.activeSelf;
+        public bool IsOpen => IsWagerModalOpen || IsOutcomeModalOpen;
+
         private void Awake()
         {
             if (wagerController == null)

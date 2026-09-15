@@ -59,6 +59,8 @@ namespace BeastClad.UI
         [SerializeField] private Button closeOutcomeModalButton;
 
         public bool IsOutcomeModalOpen => outcomeModalPanel != null && outcomeModalPanel.activeSelf;
+        public bool IsRegistrationModalOpen => registrationModalPanel != null && registrationModalPanel.activeSelf;
+        public bool IsOpen => IsOutcomeModalOpen || IsRegistrationModalOpen;
 
         private void Awake()
         {

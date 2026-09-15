@@ -45,6 +45,8 @@ namespace BeastClad.UI
         private CorporateVendorKiosk activeKiosk;
         private int currentPackIndex = 0;
 
+        public bool IsOpen => vendorModalPanel != null && vendorModalPanel.activeSelf;
+
         private void Awake()
         {
             if (interactionPromptPanel != null) interactionPromptPanel.SetActive(false);
