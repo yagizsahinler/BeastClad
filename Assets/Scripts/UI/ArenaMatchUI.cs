@@ -232,8 +232,10 @@ namespace BeastClad.UI
         {
             if (attendantPromptPanel != null)
             {
-                attendantPromptPanel.SetActive(isNearby && (registrationModalPanel == null || !registrationModalPanel.activeSelf));
-                if (attendantPromptText != null && attendant != null)
+                bool isBoutActive = boutController != null && boutController.IsBoutInProgress;
+                bool show = isNearby && !isBoutActive && (registrationModalPanel == null || !registrationModalPanel.activeSelf);
+                attendantPromptPanel.SetActive(show);
+                if (show && attendantPromptText != null && attendant != null)
                 {
                     attendantPromptText.text = attendant.GetPromptMessage();
                 }
@@ -244,6 +246,13 @@ namespace BeastClad.UI
         {
             if (attendantPromptPanel != null) attendantPromptPanel.SetActive(false);
             if (registrationModalPanel == null) return;
+
+            bool isBoutActive = boutController != null && boutController.IsBoutInProgress;
+            if (isBoutActive)
+            {
+                registrationModalPanel.SetActive(false);
+                return;
+            }
 
             registrationModalPanel.SetActive(true);
 
@@ -354,11 +363,15 @@ namespace BeastClad.UI
             {
                 if (opponentBarRoot != null) opponentBarRoot.SetActive(true);
                 if (outcomeModalPanel != null) outcomeModalPanel.SetActive(false);
+                if (attendantPromptPanel != null) attendantPromptPanel.SetActive(false);
+                if (registrationModalPanel != null) registrationModalPanel.SetActive(false);
             }
             else if (state == ArenaBoutState.ActiveBout)
             {
                 if (opponentBarRoot != null) opponentBarRoot.SetActive(true);
                 if (outcomeModalPanel != null) outcomeModalPanel.SetActive(false);
+                if (attendantPromptPanel != null) attendantPromptPanel.SetActive(false);
+                if (registrationModalPanel != null) registrationModalPanel.SetActive(false);
             }
         }
 

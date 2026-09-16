@@ -61,4 +61,12 @@
 - **Issue:** In Unity, invoking `DontDestroyOnLoad(go)` outside of Play Mode (such as during editor scripts, MCP dynamic execution, or edit-mode testing) throws `InvalidOperationException: The following game object is invoking the DontDestroyOnLoad method: [Name]. Notice that DontDestroyOnLoad can only be used in play mode`.
 - **Pattern:** Always guard `DontDestroyOnLoad` calls with `if (Application.isPlaying) DontDestroyOnLoad(go);` on persistent singletons and runtime bootstrap helpers so they remain completely safe for editor-time unit tests, builder scripts, and tool inspection.
 
+## 16. Combat Zone NPC Interaction Gating During Encounters
+- **Issue:** NPCs, kiosks, or dialogue triggers stationed near combat arenas (or whose trigger radii penetrate combat bounds) could be interacted with during active combat, allowing dialogues and registration modals to open in the middle of battle.
+- **Pattern:** Always gate interactable NPCs and registration stations by combat state (`IsInteractionPermitted => !boutController.IsBoutInProgress`). When a match starts (`PreMatch` or `ActiveBout`), immediately close any open dialogue, dismiss prompts, clear `isPlayerNearby`, and clamp `IsOpen` to `false`. Ensure interaction colliders do not overlap combat arena geometry, and suppress UI prompt and modal events in the HUD during combat states.
+
+## 17. Unity UI VerticalLayoutGroup `childControlHeight` vs Child Element Truncation
+- **Issue:** When a `VerticalLayoutGroup` has `childControlHeight = true`, it dynamically overrides the child RectTransform height with the child's `ILayoutElement.preferredHeight`. If child buttons lack an explicit `LayoutElement` component (with `minHeight` / `preferredHeight`), Unity falls back to default sprite minimums (10px). A 10px tall button squashes child `Text` components below their line height, triggering `VerticalWrapMode.Truncate` and rendering button labels completely invisible.
+- **Pattern:** For menus inside Layout Groups, always set `vlg.childControlHeight = false` or attach an explicit `LayoutElement` with `minHeight = desiredHeight` and `preferredHeight = desiredHeight` to every child button. Furthermore, always set `txt.verticalOverflow = VerticalWrapMode.Overflow;` and `txt.horizontalOverflow = HorizontalWrapMode.Overflow;` on menu button labels so text can never be silently truncated by layout fluctuations.
+
 

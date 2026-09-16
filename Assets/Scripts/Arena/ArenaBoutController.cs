@@ -57,12 +57,25 @@ namespace BeastClad.Arena
         public Vector3 ConcourseSpawnPosition => concourseSpawnPosition;
         public GameObject RingGateBarrier => ringGateBarrier;
 
+        private static ArenaBoutController activeInstance;
+        public static ArenaBoutController ActiveInstance
+        {
+            get
+            {
+                if (activeInstance == null) activeInstance = FindAnyObjectByType<ArenaBoutController>();
+                return activeInstance;
+            }
+            private set => activeInstance = value;
+        }
+        public bool IsBoutInProgress => currentState == ArenaBoutState.PreMatch || currentState == ArenaBoutState.ActiveBout;
+
         public event Action<ArenaBoutState> OnStateChanged;
         public event Action<int> OnCountdownTick;
         public event Action<bool, int, string> OnMatchConcluded; // (playerWon, prizePurse, newRank)
 
         private void Awake()
         {
+            ActiveInstance = this;
             if (playerStats == null) playerStats = FindAnyObjectByType<PlayerStatsComponent>();
             if (playerWallet == null) playerWallet = FindAnyObjectByType<PlayerWallet>();
             if (gladiator == null) gladiator = FindAnyObjectByType<SanctionedGladiatorAI2D>();
@@ -97,6 +110,11 @@ namespace BeastClad.Arena
             {
                 playerStats.OnDeath -= HandlePlayerDeath;
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (ActiveInstance == this) ActiveInstance = null;
         }
 
         private void Start()
@@ -151,6 +169,11 @@ namespace BeastClad.Arena
 
             StopAllCoroutines();
             CancelInvoke();
+
+            if (ArenaAttendantNPC.ActiveInstance != null)
+            {
+                ArenaAttendantNPC.ActiveInstance.CloseAttendant();
+            }
 
             if (playerStats != null)
             {

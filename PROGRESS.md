@@ -3,7 +3,7 @@
 **Project:** BeastClad  
 **Lead Technical Producer Status Dashboard**  
 **Engineering Philosophy:** KISS (Keep It Simple, Stupid) & YAGNI (You Aren't Gonna Need It)  
-**Last Updated:** 2026-09-13  
+**Last Updated:** 2026-09-16  
 
 ---
 
@@ -136,6 +136,8 @@
 | BUG-001 | 3.1 / 5.2 | Arena countdown and gladiator movement triggered automatically on scene entry before registering with official. | Resolved | Added `ArenaBoutState.Idle`, Proctor Cassian attendant station, and registration modal confirmation gating. |
 | BUG-002 | 1.1 / 5.2 | Player lacked a visible health indicator during combat encounters. | Resolved | Created dynamic `PlayerHealthHUD` with combat detection, alpha fading, color tiers, and lag catchup bar. |
 | BUG-003 | 3.1 / 5.2 | Unable to exit arena or proceed to a new battle after winning a bout in Legal Arena. | Resolved | Added Post-Match Outcome Modal ("Next Bout", "Exit to Concourse", "Depart Arena"), split West wall to create archway, and added dynamic RingGateBarrier. |
+| BUG-004 | 3.1 / 5.2 | Player was able to speak to Arena Attendant (Proctor Cassian) during an active battle. | Resolved | Gated attendant interaction by `IsInteractionPermitted => !boutController.IsBoutInProgress`, reduced collider radius to 1.6m to prevent penetrating ring geometry, and suppressed HUD prompts/modals during `PreMatch` and `ActiveBout`. |
+| BUG-005 | 5.2 | Pause Menu button labels were invisible when pressing Esc. | Resolved | `VerticalLayoutGroup` had `childControlHeight = true` squashing buttons to 10px, causing 22px text to truncate. Set `childControlHeight = false`, added `LayoutElement` (preferredHeight: 52px), enabled `verticalOverflow = Overflow`, and updated HUD prefab across all 4 scenes. |
 
 ---
 

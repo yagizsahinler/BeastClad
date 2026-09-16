@@ -54,6 +54,7 @@ namespace BeastClad.UI
             }
 
             EnsureUIHierarchy();
+            FixButtonLayoutAndText();
             HookListeners();
 
             if (pauseMenuPanel != null) pauseMenuPanel.SetActive(false);
@@ -115,6 +116,7 @@ namespace BeastClad.UI
                 player.SetMovementLocked(true);
             }
 
+            FixButtonLayoutAndText();
             RefreshProfileDisplay();
 
             if (controlsModalPanel != null) controlsModalPanel.SetActive(false);
@@ -373,15 +375,17 @@ namespace BeastClad.UI
                 controlsModalPanel = existingControls.gameObject;
             }
 
-            // If already complete, bind references
+            // If already complete, fix layout and bind references
             if (pauseMenuPanel != null && controlsModalPanel != null)
             {
+                FixButtonLayoutAndText();
                 BindReferencesFromHierarchy();
                 return;
             }
 
             // Build hierarchy dynamically if not present
             BuildRuntimeHierarchy();
+            FixButtonLayoutAndText();
             BindReferencesFromHierarchy();
         }
 
@@ -408,6 +412,111 @@ namespace BeastClad.UI
             if (controlsModalPanel != null)
             {
                 if (closeControlsButton == null) closeControlsButton = controlsModalPanel.transform.Find("Dialog/CloseButton")?.GetComponent<Button>();
+            }
+        }
+
+        public void FixButtonLayoutAndText()
+        {
+            if (pauseMenuPanel != null)
+            {
+                var btnGroup = pauseMenuPanel.transform.Find("Dialog/ButtonGroup");
+                if (btnGroup != null)
+                {
+                    var vlg = btnGroup.GetComponent<VerticalLayoutGroup>();
+                    if (vlg != null)
+                    {
+                        vlg.childControlHeight = false;
+                        vlg.childForceExpandHeight = false;
+                        vlg.childControlWidth = true;
+                        vlg.childForceExpandWidth = true;
+                    }
+
+                    var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+
+                    foreach (Transform child in btnGroup)
+                    {
+                        var rt = child.GetComponent<RectTransform>();
+                        if (rt != null)
+                        {
+                            rt.sizeDelta = new Vector2(440f, 52f);
+                        }
+
+                        var le = child.GetComponent<LayoutElement>();
+                        if (le == null) le = child.gameObject.AddComponent<LayoutElement>();
+                        le.minHeight = 52f;
+                        le.preferredHeight = 52f;
+
+                        var textObj = child.Find("Text");
+                        if (textObj != null)
+                        {
+                            var trt = textObj.GetComponent<RectTransform>();
+                            if (trt != null)
+                            {
+                                trt.anchorMin = Vector2.zero;
+                                trt.anchorMax = Vector2.one;
+                                trt.sizeDelta = Vector2.zero;
+                                trt.offsetMin = new Vector2(10f, 0f);
+                                trt.offsetMax = new Vector2(-10f, 0f);
+                            }
+
+                            var txt = textObj.GetComponent<Text>();
+                            if (txt != null)
+                            {
+                                if (txt.font == null && font != null) txt.font = font;
+                                txt.fontSize = 22;
+                                txt.fontStyle = FontStyle.Bold;
+                                txt.color = Color.white;
+                                txt.alignment = TextAnchor.MiddleCenter;
+                                txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+                                txt.verticalOverflow = VerticalWrapMode.Overflow;
+                                txt.raycastTarget = false;
+                                txt.enabled = true;
+
+                                string defaultLabel = child.name switch
+                                {
+                                    "ResumeButton" => "RESUME",
+                                    "SaveButton" => "SAVE GAME",
+                                    "ControlsButton" => "CONTROLS & MANUAL",
+                                    "MainMenuButton" => "RETURN TO MAIN MENU",
+                                    "QuitButton" => "QUIT TO DESKTOP",
+                                    _ => null
+                                };
+                                if (!string.IsNullOrEmpty(defaultLabel) && (string.IsNullOrEmpty(txt.text) || txt.text == "Text"))
+                                {
+                                    txt.text = defaultLabel;
+                                }
+                            }
+                        }
+                    }
+
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(btnGroup.GetComponent<RectTransform>());
+                }
+            }
+
+            if (controlsModalPanel != null)
+            {
+                var closeBtn = controlsModalPanel.transform.Find("Dialog/CloseButton");
+                if (closeBtn != null)
+                {
+                    var crt = closeBtn.GetComponent<RectTransform>();
+                    if (crt != null) crt.sizeDelta = new Vector2(360f, 52f);
+
+                    var textObj = closeBtn.Find("Text");
+                    if (textObj != null)
+                    {
+                        var ctxt = textObj.GetComponent<Text>();
+                        if (ctxt != null)
+                        {
+                            ctxt.horizontalOverflow = HorizontalWrapMode.Overflow;
+                            ctxt.verticalOverflow = VerticalWrapMode.Overflow;
+                            ctxt.enabled = true;
+                            if (string.IsNullOrEmpty(ctxt.text) || ctxt.text == "Text")
+                            {
+                                ctxt.text = "BACK TO PAUSE MENU";
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -543,7 +652,7 @@ namespace BeastClad.UI
                 var vlg = btnGroup.AddComponent<VerticalLayoutGroup>();
                 vlg.spacing = 14f;
                 vlg.childControlWidth = true;
-                vlg.childControlHeight = true;
+                vlg.childControlHeight = false;
                 vlg.childForceExpandWidth = true;
                 vlg.childForceExpandHeight = false;
 
@@ -663,11 +772,15 @@ namespace BeastClad.UI
 
         private static Button CreateMenuButton(Transform parent, string name, string text, Color color, Font font, Sprite uisprite)
         {
-            var btnObj = new GameObject(name);
+            var btnObj = new GameObject(name, typeof(RectTransform));
             btnObj.transform.SetParent(parent, false);
 
-            var rt = btnObj.AddComponent<RectTransform>();
+            var rt = btnObj.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(440f, 52f);
+
+            var le = btnObj.AddComponent<LayoutElement>();
+            le.minHeight = 52f;
+            le.preferredHeight = 52f;
 
             var img = btnObj.AddComponent<Image>();
             img.sprite = uisprite;
@@ -682,12 +795,14 @@ namespace BeastClad.UI
             colors.selectedColor = color * 1.2f;
             btn.colors = colors;
 
-            var textObj = new GameObject("Text");
+            var textObj = new GameObject("Text", typeof(RectTransform));
             textObj.transform.SetParent(btnObj.transform, false);
-            var trt = textObj.AddComponent<RectTransform>();
+            var trt = textObj.GetComponent<RectTransform>();
             trt.anchorMin = Vector2.zero;
             trt.anchorMax = Vector2.one;
             trt.sizeDelta = Vector2.zero;
+            trt.offsetMin = new Vector2(10f, 0f);
+            trt.offsetMax = new Vector2(-10f, 0f);
 
             var txt = textObj.AddComponent<Text>();
             txt.font = font;
@@ -697,6 +812,8 @@ namespace BeastClad.UI
             txt.color = Color.white;
             txt.text = text;
             txt.raycastTarget = false;
+            txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
 
             var outl = textObj.AddComponent<Outline>();
             outl.effectColor = new Color(0f, 0f, 0f, 0.85f);

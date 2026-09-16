@@ -337,7 +337,7 @@ namespace BeastClad.Editor
 
             var attCol = attendantObj.AddComponent<CircleCollider2D>();
             attCol.isTrigger = true;
-            attCol.radius = 2.4f / 6.5f;
+            attCol.radius = 1.6f / 6.5f;
 
             attendantObj.AddComponent<ArenaAttendantNPC>();
 

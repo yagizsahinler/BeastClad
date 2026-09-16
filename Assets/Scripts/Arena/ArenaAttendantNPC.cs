@@ -23,14 +23,49 @@ namespace BeastClad.Arena
 
         private bool isPlayerNearby;
         private bool isOpen;
+        [SerializeField] private ArenaBoutController boutController;
+        private bool isSubscribed = false;
 
         public string AttendantName => attendantName;
         public string RoleTitle => roleTitle;
         public string DialogueMessage => dialogueMessage;
         public string PromptText => promptText;
-        public bool IsOpen => isOpen;
 
-        public static ArenaAttendantNPC ActiveInstance { get; private set; }
+        public bool IsOpen
+        {
+            get
+            {
+                if (!IsInteractionPermitted && isOpen)
+                {
+                    isOpen = false;
+                }
+                return isOpen;
+            }
+        }
+
+        public bool IsInteractionPermitted
+        {
+            get
+            {
+                SubscribeToBoutController();
+                if (boutController != null && boutController.IsBoutInProgress)
+                {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        private static ArenaAttendantNPC activeInstance;
+        public static ArenaAttendantNPC ActiveInstance
+        {
+            get
+            {
+                if (activeInstance == null) activeInstance = FindAnyObjectByType<ArenaAttendantNPC>();
+                return activeInstance;
+            }
+            private set => activeInstance = value;
+        }
 
         public static event Action<ArenaAttendantNPC, bool> OnInteractionPrompt;
         public static event Action<ArenaAttendantNPC> OnAttendantOpened;
@@ -41,15 +76,78 @@ namespace BeastClad.Arena
             ActiveInstance = this;
             var col = GetComponent<Collider2D>();
             if (col != null) col.isTrigger = true;
+            SubscribeToBoutController();
+        }
+
+        private void OnEnable()
+        {
+            SubscribeToBoutController();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromBoutController();
         }
 
         private void OnDestroy()
         {
-            if (ActiveInstance == this) ActiveInstance = null;
+            UnsubscribeFromBoutController();
+            if (activeInstance == this) activeInstance = null;
+        }
+
+        private void SubscribeToBoutController()
+        {
+            if (isSubscribed) return;
+            if (boutController == null) boutController = ArenaBoutController.ActiveInstance;
+            if (boutController != null)
+            {
+                boutController.OnStateChanged -= HandleBoutStateChanged;
+                boutController.OnStateChanged += HandleBoutStateChanged;
+                isSubscribed = true;
+            }
+        }
+
+        private void UnsubscribeFromBoutController()
+        {
+            if (boutController != null)
+            {
+                boutController.OnStateChanged -= HandleBoutStateChanged;
+            }
+            isSubscribed = false;
+        }
+
+        private void HandleBoutStateChanged(ArenaBoutState newState)
+        {
+            if (newState == ArenaBoutState.PreMatch || newState == ArenaBoutState.ActiveBout)
+            {
+                if (isOpen)
+                {
+                    CloseAttendant();
+                }
+                if (isPlayerNearby)
+                {
+                    isPlayerNearby = false;
+                    OnInteractionPrompt?.Invoke(this, false);
+                }
+            }
         }
 
         private void Update()
         {
+            if (!IsInteractionPermitted)
+            {
+                if (isOpen)
+                {
+                    CloseAttendant();
+                }
+                if (isPlayerNearby)
+                {
+                    isPlayerNearby = false;
+                    OnInteractionPrompt?.Invoke(this, false);
+                }
+                return;
+            }
+
             if (!isPlayerNearby) return;
 
             var kb = Keyboard.current;
@@ -77,6 +175,12 @@ namespace BeastClad.Arena
         {
             if (other.CompareTag("Player") || other.GetComponent<PlayerController2D>() != null)
             {
+                if (!IsInteractionPermitted)
+                {
+                    isPlayerNearby = false;
+                    return;
+                }
+
                 isPlayerNearby = true;
                 OnInteractionPrompt?.Invoke(this, true);
             }
@@ -97,6 +201,12 @@ namespace BeastClad.Arena
 
         public void OpenAttendant()
         {
+            if (!IsInteractionPermitted)
+            {
+                Debug.LogWarning($"<color=#FF8800>[Arena Registrar]</color> Cannot speak with {attendantName} while a bout is in progress!");
+                return;
+            }
+
             isOpen = true;
             OnAttendantOpened?.Invoke(this);
             Debug.Log($"<color=#FFD700>[Arena Registrar]</color> Speaking with <b>{attendantName}</b>.");
@@ -111,7 +221,7 @@ namespace BeastClad.Arena
 
         public string GetPromptMessage()
         {
-            return $"[ F ] {promptText}";
+            return IsInteractionPermitted ? $"[ F ] {promptText}" : "";
         }
     }
 }
