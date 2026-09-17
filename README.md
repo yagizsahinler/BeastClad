@@ -40,9 +40,15 @@ Instead of flat numerical type-matchup multipliers, combat features organic phys
 
 ### 4. Non-Linear Sandbox Paths
 The world offers multiple divergent ways to survive:
-- **The Legal Arena:** Sponsored district circuits, corporate scrutiny, division ladder rank promotions (Bronze $\rightarrow$ Silver $\rightarrow$ Apex), and prize purses.
-- **The Adventurer's Guild:** Quarantined wilderness tracking, tactical pheromone lures, deployable wire snares, live subdual captures, and research specimen bounties.
-- **The Illegal Underground (Roadmap):** Back-alley ripperdocs, volatile unregistered beasts with overclocked traits, and municipal enforcer heat evasion.
+- **The Legal Arena:** Sponsored district circuits, corporate scrutiny, official bout registration (Proctor Cassian), division ladder rank promotions (Bronze $\rightarrow$ Silver $\rightarrow$ Apex), and prize purses.
+- **The Adventurer's Guild:** Quarantined wilderness tracking, tactical pheromone lures, deployable wire snares, live subdual captures, and research specimen bounties (Guildmaster Vane).
+- **The Illegal Underground:** Back-alley ripperdocs (Dr. Silas), volatile unregistered beasts with overclocked traits and true-damage recoil, unsanctioned pit match wagers (Pitmaster Jax), and municipal enforcer heat evasion.
+
+### 5. World Transit, Persistence & Dynamic HUD
+- **Central District Transit Hub:** Connects all sectors with seamless transitions, target spawn anchoring, and municipal security checkpoints with Quarantine Contraband Lockers.
+- **Full JSON Persistence:** Automatic save/load pipeline (`SaveManager`) preserving credits, equipped limb loadouts, captured roster, and arena standing across scene transitions and sessions.
+- **Dynamic Reactive HUD:** Context-aware combat health bar with auto-fading, 3-tier health thresholds, and trailing damage lag visualization.
+- **Complete Menu Suite:** Dedicated startup `MainMenu` with campaign resume, settings, and bio-infuse lore codex, alongside a universal in-game `PauseMenuUI` accessible via `[Esc]`.
 
 ---
 
@@ -58,8 +64,9 @@ The world offers multiple divergent ways to survive:
 | **Legs Dash** | `Left Shift` | `Right Trigger` (RT / R2) |
 | **Deploy Pheromone Lure** | `[ 1 ]` | — |
 | **Deploy Wire Snare Trap** | `[ 2 ]` | — |
-| **Subdue & Capture Prey** | `[ E ]` (when near snare) | — |
+| **Subdue Prey / Disarm Contraband** | `[ E ]` | — |
 | **Interact / Talk to NPC** | `[ F ]` | — |
+| **Pause Menu / Dismiss Active Modals** | `[ Escape ]` | `Start / Options` |
 
 ---
 
@@ -75,14 +82,16 @@ The world offers multiple divergent ways to survive:
 
 ---
 
-## 📂 Playable Test Scenes
+## 📂 Playable Scenes
 
 | Scene Path | Description |
 | :--- | :--- |
+| `Assets/Scenes/MainMenu.unity` | **Startup Main Menu:** Campaign management (Continue / New Game with overwrite prompt), master audio & keybinding controls cheatsheet, and Bio-Infuse world lore codex. Registered as build index 0. |
+| `Assets/Scenes/District_CentralHub.unity` | **Central District Transit Hub:** Overworld nexus connecting all sectors; features municipal security scanner gates, Quarantine Contraband Lockers, and multi-directional district transit gates. |
+| `Assets/Scenes/Arena_Colosseum.unity` | **Colosseum Tournament Arena:** Sanctioned tournament ring with Proctor Cassian bout registration, match countdown, gladiator opponent AI (*Valerius the Shock-Lancer*), dynamic ring barrier, corporate kiosk, and post-match victory/exit flows. |
+| `Assets/Scenes/Adventurer_Wilderness.unity` | **Wilderness Clearing & Trapping:** $32 \times 24$ woodland tilemap with roaming wild beasts, pheromone lures, wire snares, subdual captures, and Guildmaster Vane contract turn-in. |
+| `Assets/Scenes/Underground_BlackMarket.unity` | **The Underground Black Market:** Contraband district featuring Dr. Silas's illegal Ripperdoc augmentations (overclocked beasts), Pitmaster Jax's unsanctioned pit match wagers, brawler combat, and municipal scanner checkpoints. |
 | `Assets/Scenes/SampleScene.unity` | **Combat & Chemistry Sandbox:** Enclosed test arena with training dummies, pedestal equipment stations, and water/electric terraforming reactions. |
-| `Assets/Scenes/Adventurer_Wilderness.unity` | **Wilderness Clearing & Trapping:** $32 \times 24$ tilemap zone with roaming wild beasts, pheromone lures, wire snares, subdual captures, and Guildmaster Vane contract turn-in. |
-| `Assets/Scenes/Arena_Colosseum.unity` | **Colosseum Tournament Arena:** Sanctioned tournament ring featuring match countdown, gladiator opponent AI (*Valerius the Shock-Lancer*), corporate starter pack kiosk, division ladder progression, and prize purses. |
-| `Assets/Scenes/Underground_BlackMarket.unity` | **The Underground Black Market:** Contraband district featuring Dr. Silas's illegal Ripperdoc augmentations (overclocked volatile beasts), Pitmaster Jax's unsanctioned pit match wagers, brawler combat, and municipal scanner checkpoints. |
 
 ---
 
@@ -94,7 +103,8 @@ Current milestone progress is tracked in detail in [`PROGRESS.md`](PROGRESS.md):
 - [x] **Phase 2: The Adventurer & Trapping Module** (Tilemap Wilderness, Scent Lures, Wire Snares, Live Capture, Guild Contracts)
 - [x] **Phase 3: The Arena & Legal Progression** (Gladiator Tournament Loop, Division Ladder, Corporate Starter Pack Kiosks)
 - [x] **Phase 4: The Underground & Black Market** (State Registration Scanners, Ripperdoc Overclocks, Unsanctioned Pit Wagers)
-- [ ] **Phase 5: World Integration, Persistence & Roster Management** (District Transit Hub, JSON Save/Load System, Roster & Infuse UI)
+- [x] **Phase 5.1 & 5.2: World Integration, Persistence & Polish** (Central Transit Hub, Scene Transitions, Quarantine Locker, JSON Save/Load, Dynamic Health HUD, Main Menu & Pause Menu, Arena Flow Gating)
+- [ ] **Phase 5.3: Dedicated Roster & Infuse Management UI** (Full-screen roster modal, socket drag-and-drop, real-time stat delta breakdown)
 
 For the complete design philosophy, mechanical specifications, and world lore, see [`CORE_GDD.md`](CORE_GDD.md).
 
