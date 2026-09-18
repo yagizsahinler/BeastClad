@@ -41,6 +41,36 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 1498723569
+    locked: 0
+  - name: Floor
+    uniqueID: 80233310
+    locked: 0
+  - name: FloorHazards
+    uniqueID: 1665703022
+    locked: 0
+  - name: Props_Low
+    uniqueID: 2038488031
+    locked: 0
+  - name: Entities
+    uniqueID: 593283160
+    locked: 0
+  - name: EquippedArmor
+    uniqueID: 953102712
+    locked: 0
+  - name: VFX_Under
+    uniqueID: 1580190376
+    locked: 0
+  - name: Props_High
+    uniqueID: 1684172677
+    locked: 0
+  - name: VFX_Over
+    uniqueID: 1914575760
+    locked: 0
+  - name: UI_World
+    uniqueID: 1481462706
+    locked: 0
   m_RenderingLayers:
   - Default
   m_MigratedRenderPipelines: []

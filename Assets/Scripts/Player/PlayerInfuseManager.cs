@@ -186,6 +186,15 @@ namespace BeastClad.Player
             {
                 RecalculateAllStats();
                 OnInfuseChanged?.Invoke(slot, monster, module);
+
+                if (module != null && module.equipSound != null)
+                {
+                    BeastClad.Audio.AudioManager.Instance?.PlaySFX(module.equipSound, 0.9f, 0.05f);
+                }
+                else
+                {
+                    BeastClad.Audio.AudioManager.Instance?.PlaySyntheticEquipCue();
+                }
             }
 
             return true;

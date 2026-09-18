@@ -46,6 +46,23 @@ namespace BeastClad.Combat
             {
                 hitTargets.Add(other);
                 hurtbox.ReceiveHit(payload);
+
+                // Audio cue
+                if (payload.hitSound != null)
+                {
+                    BeastClad.Audio.AudioManager.Instance?.PlaySFX(payload.hitSound, 1f, 0.08f);
+                }
+                else
+                {
+                    BeastClad.Audio.AudioManager.Instance?.PlaySyntheticHitCue();
+                }
+
+                // Impact VFX
+                if (payload.hitImpactVfxPrefab != null)
+                {
+                    var vfx = Instantiate(payload.hitImpactVfxPrefab, other.transform.position, Quaternion.identity);
+                    Destroy(vfx, 1.5f);
+                }
             }
 
             // Interact with Surface Hazard (Terraforming Chemistry)

@@ -28,6 +28,32 @@ namespace BeastClad.Data
         [Tooltip("Active hitbox lifespan in seconds.")]
         public float hitboxDuration = 0.15f;
 
+        [Header("Combat Timing Lifecycle (Seconds)")]
+        [Tooltip("Startup wind-up duration before hitbox is active. Default 0 for immediate activation.")]
+        [Min(0f)]
+        public float startupDuration = 0.0f;
+
+        [Tooltip("Recovery duration / attack follow-through lockout after active hitbox expires.")]
+        [Min(0f)]
+        public float recoveryDuration = 0.05f;
+
+        [Header("Animation & Visual Effects (VFX)")]
+        [Tooltip("Mecanim animator trigger or state name to play on execution.")]
+        public string animationTriggerName = "Attack";
+
+        [Tooltip("Slash arc, bio-stinger trail, or projectile visual effect spawned on attack execution.")]
+        public GameObject attackVfxPrefab;
+
+        [Tooltip("Burst, spark, or splash visual effect spawned at impact location on hitting a hurtbox.")]
+        public GameObject hitImpactVfxPrefab;
+
+        [Header("Audio Signatures")]
+        [Tooltip("Sound played upon swinging, firing, or initiating the skill.")]
+        public AudioClip attackSound;
+
+        [Tooltip("Sound played upon striking an opponent or hurtbox.")]
+        public AudioClip hitSound;
+
         [Header("Terraforming & Battlefield Hazards")]
         [Tooltip("Does this attack deposit a surface hazard (e.g. Water puddle, acid slick)?")]
         public bool spawnsSurfaceHazard;

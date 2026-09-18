@@ -26,9 +26,25 @@ namespace BeastClad.Data
         [Tooltip("Optional secondary element for advanced hybrid monsters.")]
         public ElementalTypeSO secondaryElement;
 
-        [Header("UI Visuals")]
+        [Header("UI & World Visuals")]
         [Tooltip("Portrait or catalog icon for this creature.")]
         public Sprite monsterIcon;
+
+        [Tooltip("Full body sprite used when the monster roams in the wild or appears in enclosures.")]
+        public Sprite overworldSprite;
+
+        [Tooltip("Optional animator controller for idle/movement/attack animations.")]
+        public RuntimeAnimatorController animatorController;
+
+        [Tooltip("Signature emissive or aura glow color for this species.")]
+        public Color signatureGlowColor = Color.white;
+
+        [Header("Audio Signatures")]
+        [Tooltip("Species vocalization / cry played on detection, encounter, or summon.")]
+        public AudioClip crySound;
+
+        [Tooltip("Audio played when successfully trapped or acquired.")]
+        public AudioClip captureSound;
 
         [TextArea(2, 4)]
         public string loreDescription;

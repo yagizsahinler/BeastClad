@@ -20,12 +20,14 @@ namespace BeastClad.Combat
         private PlayerInfuseManager infuseManager;
         private PlayerController2D playerController;
         private PlayerStatsComponent playerStats;
+        private PlayerInfuseVisualController visualController;
 
         private void Awake()
         {
             infuseManager = GetComponent<PlayerInfuseManager>();
             playerController = GetComponent<PlayerController2D>();
             playerStats = GetComponent<PlayerStatsComponent>();
+            visualController = GetComponent<PlayerInfuseVisualController>();
 
             if (hydroElement == null)
             {
@@ -86,7 +88,30 @@ namespace BeastClad.Combat
 
         private void ExecuteMeleeAttack(InfusePartSO module, Vector2 facingDir, float distance, float radius)
         {
-            Vector3 spawnPos = transform.position + (Vector3)(facingDir * distance);
+            float startup = module.activeSkill != null ? module.activeSkill.startupDuration : 0f;
+            if (startup > 0.001f)
+            {
+                StartCoroutine(DelayedMeleeRoutine(module, facingDir, distance, radius, startup));
+            }
+            else
+            {
+                DoExecuteMelee(module, facingDir, distance, radius);
+            }
+        }
+
+        private System.Collections.IEnumerator DelayedMeleeRoutine(InfusePartSO module, Vector2 facingDir, float distance, float radius, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            DoExecuteMelee(module, facingDir, distance, radius);
+        }
+
+        private void DoExecuteMelee(InfusePartSO module, Vector2 facingDir, float distance, float radius)
+        {
+            Vector3 originPos = (visualController != null && visualController.MeleeSocket != null)
+                ? visualController.MeleeSocket.position
+                : transform.position;
+
+            Vector3 spawnPos = originPos + (Vector3)(facingDir * distance);
 
             var hitboxObj = new GameObject("MeleeHitbox_" + module.targetSlot);
             hitboxObj.transform.position = spawnPos;
@@ -125,26 +150,55 @@ namespace BeastClad.Combat
             }
 
             var element = module.activeSkill != null ? module.activeSkill.element : null;
+            var attackVfx = module.activeSkill != null ? module.activeSkill.attackVfxPrefab : null;
+            var hitVfx = module.activeSkill != null ? module.activeSkill.hitImpactVfxPrefab : null;
+            var attackSfx = module.activeSkill != null ? module.activeSkill.attackSound : null;
+            var hitSfx = module.activeSkill != null ? module.activeSkill.hitSound : null;
+
+            // Attack audio
+            if (attackSfx != null)
+            {
+                BeastClad.Audio.AudioManager.Instance?.PlaySFX(attackSfx, 1f, 0.05f);
+            }
+            else
+            {
+                BeastClad.Audio.AudioManager.Instance?.PlaySyntheticHitCue();
+            }
+
+            // Attack swing VFX
+            float lifetime = module.activeSkill != null ? module.activeSkill.hitboxDuration : 0.15f;
+            if (attackVfx != null)
+            {
+                float angle = Mathf.Atan2(facingDir.y, facingDir.x) * Mathf.Rad2Deg;
+                var vfxObj = Instantiate(attackVfx, spawnPos, Quaternion.Euler(0f, 0f, angle));
+                Destroy(vfxObj, lifetime + 0.5f);
+            }
+            else
+            {
+                CreateAttackVisualCue(spawnPos, radius, element != null ? element.elementColor : Color.white, lifetime);
+            }
 
             var payload = new DamagePayload(
                 damage,
                 element,
                 facingDir,
                 5.0f,
-                gameObject
+                gameObject,
+                hitVfx,
+                hitSfx
             );
 
             var hitbox = hitboxObj.AddComponent<Hitbox2D>();
-            float lifetime = module.activeSkill != null ? module.activeSkill.hitboxDuration : 0.15f;
             hitbox.Initialize(payload, lifetime);
-
-            // Ephemeral visual flash for the swing
-            CreateAttackVisualCue(spawnPos, radius, element != null ? element.elementColor : Color.white, lifetime);
         }
 
         private void SpawnWaterPuddle(Vector2 facingDir)
         {
-            Vector3 puddlePos = transform.position + (Vector3)(facingDir * 1.2f);
+            Vector3 originPos = (visualController != null && visualController.GroundSocket != null)
+                ? visualController.GroundSocket.position
+                : transform.position;
+
+            Vector3 puddlePos = originPos + (Vector3)(facingDir * 1.2f);
 
             var puddleObj = new GameObject("SurfaceHazard_WaterPuddle");
             puddleObj.transform.position = puddlePos;
@@ -153,6 +207,7 @@ namespace BeastClad.Combat
             var sr = puddleObj.AddComponent<SpriteRenderer>();
             sr.sprite = puddleSprite;
             sr.color = new Color(0.15f, 0.65f, 1.0f, 0.6f);
+            sr.sortingLayerName = "FloorHazards";
             sr.sortingOrder = 0;
 
             var col = puddleObj.AddComponent<CircleCollider2D>();
@@ -192,7 +247,8 @@ namespace BeastClad.Combat
             var sr = cue.AddComponent<SpriteRenderer>();
             sr.sprite = puddleSprite;
             sr.color = new Color(tint.r, tint.g, tint.b, 0.5f);
-            sr.sortingOrder = 4;
+            sr.sortingLayerName = "VFX_Over";
+            sr.sortingOrder = 1;
 
             Destroy(cue, duration);
         }

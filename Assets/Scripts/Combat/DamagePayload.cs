@@ -14,6 +14,8 @@ namespace BeastClad.Combat
         public Vector2 knockbackDirection;
         public float knockbackForce;
         public GameObject source;
+        public GameObject hitImpactVfxPrefab;
+        public AudioClip hitSound;
 
         public DamagePayload(float damage, ElementalTypeSO elem, Vector2 knockbackDir, float knockbackStrength, GameObject attacker)
         {
@@ -22,6 +24,19 @@ namespace BeastClad.Combat
             knockbackDirection = knockbackDir;
             knockbackForce = knockbackStrength;
             source = attacker;
+            hitImpactVfxPrefab = null;
+            hitSound = null;
+        }
+
+        public DamagePayload(float damage, ElementalTypeSO elem, Vector2 knockbackDir, float knockbackStrength, GameObject attacker, GameObject impactVfx, AudioClip impactSound)
+        {
+            rawDamage = damage;
+            element = elem;
+            knockbackDirection = knockbackDir;
+            knockbackForce = knockbackStrength;
+            source = attacker;
+            hitImpactVfxPrefab = impactVfx;
+            hitSound = impactSound;
         }
     }
 }
