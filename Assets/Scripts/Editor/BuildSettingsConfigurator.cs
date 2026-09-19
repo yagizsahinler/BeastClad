@@ -8,11 +8,11 @@ namespace BeastClad.Editor
     {
         private static readonly string[] ScenePaths = new string[]
         {
+            "Assets/Scenes/MainMenu.unity",
             "Assets/Scenes/District_CentralHub.unity",
-            "Assets/Scenes/Adventurer_Wilderness.unity",
             "Assets/Scenes/Arena_Colosseum.unity",
-            "Assets/Scenes/Underground_BlackMarket.unity",
-            "Assets/Scenes/SampleScene.unity"
+            "Assets/Scenes/Adventurer_Wilderness.unity",
+            "Assets/Scenes/Underground_BlackMarket.unity"
         };
 
         [MenuItem("BeastClad/Configure Build Scenes")]

@@ -45,7 +45,7 @@ namespace BeastClad.Editor
             uacd.renderPostProcessing = true;
 
             var camFollow = camObj.AddComponent<CameraFollow2D>();
-            camFollow.SetBounds(new Vector2(-12.0f, -8.0f), new Vector2(12.0f, 8.0f));
+            camFollow.SetBounds(new Vector2(-14.0f, -8.0f), new Vector2(12.0f, 8.5f));
 
             if (volumeProfile != null)
             {
@@ -176,6 +176,28 @@ namespace BeastClad.Editor
             CreateVisibleWall(boundsObj.transform, "Wall_West_B", new Vector2(-15.5f, -6.0f), new Vector2(1.2f, 8.0f), uisprite);
 
             CreateVisibleWall(boundsObj.transform, "Wall_East", new Vector2(15.5f, 0f), new Vector2(1.2f, 20f), uisprite);
+
+            // ==========================================
+            // INVISIBLE BOUNDARY WALLS & TUNNEL GUIDES
+            // Encloses metro transit area and prevents player from walking into the endless void
+            // ==========================================
+            // Gaps Plugs (Seals the openings behind gates so player can never escape the perimeter)
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_North_GapPlug", new Vector2(0f, 9.5f), new Vector2(4.5f, 1.2f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_West_GapPlug", new Vector2(-15.5f, 0f), new Vector2(1.2f, 4.5f));
+
+            // Tunnel Backstops (Halts player cleanly inside the interaction trigger volume, preventing them from walking past)
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_NorthColosseum_Backstop", new Vector2(0f, 8.6f), new Vector2(4.8f, 0.6f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_WestOutlands_Backstop", new Vector2(-14.7f, 0f), new Vector2(0.6f, 4.8f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_SouthUndercity_Backstop", new Vector2(9.5f, -7.8f), new Vector2(3.8f, 0.6f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_SouthUndercity_FlankEast", new Vector2(11.4f, -6.5f), new Vector2(0.6f, 3.0f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_SouthUndercity_FlankWest", new Vector2(7.6f, -6.5f), new Vector2(0.6f, 3.0f));
+
+            // Tunnel Guidance Walls (Keeps player focused on illuminated transit runways and stops wandering into void)
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_NorthTunnel_Left", new Vector2(-2.4f, 5.5f), new Vector2(0.6f, 6.0f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_NorthTunnel_Right", new Vector2(2.4f, 5.5f), new Vector2(0.6f, 6.0f));
+
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_WestTunnel_Top", new Vector2(-8.0f, 2.2f), new Vector2(13.5f, 0.6f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_WestTunnel_Bottom", new Vector2(-8.0f, -2.2f), new Vector2(13.5f, 0.6f));
 
             // ==========================================
             // 4. NORTH WING: GRAND COLOSSEUM GATE & SCANNER
@@ -589,6 +611,20 @@ namespace BeastClad.Editor
             hsr.color = new Color(0.95f, 0.75f, 0.05f, 1f);
             hsr.sortingOrder = 3;
             hazard.transform.localPosition = new Vector3(0f, -(size.y - hazardThickness) * 0.5f, 0f);
+        }
+
+        private static GameObject CreateInvisibleWall(Transform parent, string name, Vector2 pos, Vector2 size)
+        {
+            var wall = new GameObject(name);
+            wall.transform.SetParent(parent);
+            wall.transform.position = pos;
+
+            var col = wall.AddComponent<BoxCollider2D>();
+            col.size = size;
+            col.isTrigger = false;
+            wall.transform.localScale = Vector3.one;
+
+            return wall;
         }
 
         private static void CreateWorldSign(Transform parent, string name, Vector3 localPos, string mainText, Color mainColor, string subText = null, Color? subColor = null)

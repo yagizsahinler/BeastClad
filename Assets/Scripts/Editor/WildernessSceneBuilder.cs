@@ -186,6 +186,10 @@ namespace BeastClad.Editor
             CreatePerimeterWall(boundaryRoot.transform, "Boundary_South_Left", new Vector2(-9.5f, -9.5f), new Vector2(15f, 1.5f), uisprite);
             CreatePerimeterWall(boundaryRoot.transform, "Boundary_South_Right", new Vector2(9.5f, -9.5f), new Vector2(15f, 1.5f), uisprite);
 
+            // South Gap Plug & Exit Portal Backstop (Halts player inside exit portal and stops escaping into void)
+            CreateInvisibleWall(boundaryRoot.transform, "InvisibleWall_South_GapPlug", new Vector2(0f, -9.5f), new Vector2(6.0f, 1.5f));
+            CreateInvisibleWall(boundaryRoot.transform, "InvisibleWall_ExitHub_Backstop", new Vector2(0f, -8.8f), new Vector2(5.5f, 0.6f));
+
             // ==========================================
             // 7. TRAVELLERS' GUILD EXPEDITION CAMP
             // ==========================================
@@ -560,6 +564,20 @@ namespace BeastClad.Editor
             msr.color = new Color(0.18f, 0.45f, 0.22f, 1f);
             msr.sortingOrder = 3;
             mossTrim.transform.localPosition = new Vector3(0f, -(size.y - trimThickness) * 0.5f, 0f);
+        }
+
+        private static GameObject CreateInvisibleWall(Transform parent, string name, Vector2 pos, Vector2 size)
+        {
+            var wall = new GameObject(name);
+            wall.transform.SetParent(parent, false);
+            wall.transform.localPosition = pos;
+
+            var col = wall.AddComponent<BoxCollider2D>();
+            col.size = size;
+            col.isTrigger = false;
+            wall.transform.localScale = Vector3.one;
+
+            return wall;
         }
 
         private static void CreateWorldSign(Transform parent, string name, Vector3 localPos, string mainText, Color mainColor, string subText = null, Color? subColor = null)

@@ -211,6 +211,9 @@ namespace BeastClad.Editor
             CreateVisibleWall(boundsObj.transform, "Wall_West", new Vector2(-16f, 0.5f), new Vector2(1.2f, 20f), uisprite);
             CreateVisibleWall(boundsObj.transform, "Wall_East", new Vector2(16f, 0.5f), new Vector2(1.2f, 20f), uisprite);
 
+            // South Exit Stairwell Backstop (Prevents walking past Exit_ToCentralHub into the void)
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_ExitHub_Backstop", new Vector2(0f, -8.3f), new Vector2(4.5f, 0.6f));
+
             // Corner Bulkhead Pillars
             CreatePillar(boundsObj.transform, "Pillar_NW", new Vector2(-15.5f, 10.0f), uisprite);
             CreatePillar(boundsObj.transform, "Pillar_NE", new Vector2(15.5f, 10.0f), uisprite);
@@ -636,6 +639,20 @@ namespace BeastClad.Editor
             hsr.color = new Color(0.95f, 0.75f, 0.05f, 1f); // Hazard yellow
             hsr.sortingOrder = 3;
             hazard.transform.localPosition = new Vector3(0f, -(size.y - hazardThickness) * 0.5f, 0f);
+        }
+
+        private static GameObject CreateInvisibleWall(Transform parent, string name, Vector2 pos, Vector2 size)
+        {
+            var wall = new GameObject(name);
+            wall.transform.SetParent(parent);
+            wall.transform.position = pos;
+
+            var col = wall.AddComponent<BoxCollider2D>();
+            col.size = size;
+            col.isTrigger = false;
+            wall.transform.localScale = Vector3.one;
+
+            return wall;
         }
 
         private static void CreatePillar(Transform parent, string name, Vector2 pos, Sprite uisprite)

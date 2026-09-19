@@ -43,6 +43,7 @@ namespace BeastClad.Editor
         {
             string[] scenePaths = new string[]
             {
+                "Assets/Scenes/MainMenu.unity",
                 "Assets/Scenes/District_CentralHub.unity",
                 "Assets/Scenes/Arena_Colosseum.unity",
                 "Assets/Scenes/Adventurer_Wilderness.unity",

@@ -174,6 +174,12 @@ namespace BeastClad.Editor
             CreateVisibleWall(boundsObj.transform, "Wall_West_North", new Vector2(-7.2f, 3.8f), new Vector2(0.8f, 4.2f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
             CreateVisibleWall(boundsObj.transform, "Wall_West_South", new Vector2(-7.2f, -3.8f), new Vector2(0.8f, 4.2f), uisprite, new Color(0.35f, 0.25f, 0.15f, 1f));
 
+            // Concourse Invisible Boundary Walls (Encloses concourse and halts player inside exit portal)
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_Concourse_North", new Vector2(-8.5f, 5.5f), new Vector2(9.0f, 0.8f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_Concourse_South", new Vector2(-8.5f, -5.5f), new Vector2(9.0f, 0.8f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_Concourse_West", new Vector2(-13.0f, 0f), new Vector2(0.8f, 11.8f));
+            CreateInvisibleWall(boundsObj.transform, "InvisibleWall_ExitHub_Backstop", new Vector2(-12.8f, -3.5f), new Vector2(0.6f, 3.0f));
+
             // Dynamic Ring Gate Barrier across central opening (sealed during combat, open during Idle & Post-Match)
             ringBarrierObj = new GameObject("RingGateBarrier");
             ringBarrierObj.transform.SetParent(boundsObj.transform, false);
@@ -545,6 +551,20 @@ namespace BeastClad.Editor
             hsr.color = new Color(0.95f, 0.75f, 0.05f, 1f);
             hsr.sortingOrder = 4;
             hazard.transform.localPosition = new Vector3(0f, -(size.y - hazardThickness) * 0.5f, 0f);
+        }
+
+        private static GameObject CreateInvisibleWall(Transform parent, string name, Vector2 localPos, Vector2 size)
+        {
+            var wall = new GameObject(name);
+            wall.transform.SetParent(parent, false);
+            wall.transform.localPosition = localPos;
+
+            var col = wall.AddComponent<BoxCollider2D>();
+            col.size = size;
+            col.isTrigger = false;
+            wall.transform.localScale = Vector3.one;
+
+            return wall;
         }
 
         private static void CreateWorldSign(Transform parent, string name, Vector3 localPos, string mainText, Color mainColor, string subText = null, Color? subColor = null)
