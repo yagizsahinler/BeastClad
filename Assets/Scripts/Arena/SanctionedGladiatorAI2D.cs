@@ -17,42 +17,42 @@ namespace BeastClad.Arena
     }
 
     /// <summary>
-    /// Autonomous sanctioned tournament gladiator AI infused with corporate monster gear.
-    /// Operates with real-time tactical spacing, attack telegraphs, and cooldown-driven abilities.
+    /// AI controller for sanctioned tournament gladiators (e.g. Valerius the Shock-Lancer).
+    /// Implements pacing behaviors: approach, circle, windup telegraph flash, forward lunge attack.
+    /// Features flinch hitstun interruption and directional knockback response.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    [RequireComponent(typeof(Collider2D))]
     [RequireComponent(typeof(Hurtbox2D))]
+    [DisallowMultipleComponent]
     public class SanctionedGladiatorAI2D : MonoBehaviour
     {
-        [Header("Gladiator Identity")]
+        [Header("Gladiator Identity & Stats")]
         [SerializeField] private string gladiatorName = "Valerius the Shock-Lancer";
-        [SerializeField] private string corporateSponsor = "Aegis-Fauna Corp (Bronze League)";
-
-        [Header("Attributes")]
-        [SerializeField] private float maxHealth = 180f;
+        [SerializeField] private string corporateSponsor = "Aegis Dynamics";
+        [SerializeField] private float maxHealth = 120f;
         [SerializeField] private float defense = 5f;
         [SerializeField] private float moveSpeed = 4.2f;
-
-        [Header("Combat Settings")]
-        [SerializeField] private float attackRange = 2.4f;
-        [SerializeField] private float attackCooldown = 2.2f;
         [SerializeField] private float attackDamage = 18f;
+
+        [Header("Combat Pacing")]
+        [SerializeField] private float attackRange = 2.0f;
+        [SerializeField] private float attackCooldown = 2.2f;
         [SerializeField] private float telegraphDuration = 0.45f;
         [SerializeField] private ElementalTypeSO attackElement;
 
-        [Header("Visual Feedback")]
-        [SerializeField] private SpriteRenderer spriteRenderer;
-
         private Rigidbody2D rb;
         private Hurtbox2D hurtbox;
+        private SpriteRenderer spriteRenderer;
         private Transform playerTarget;
+
         private GladiatorAIState currentState = GladiatorAIState.Inactive;
 
         private float currentHealth;
         private float attackTimer;
         private float stateTimer;
         private int circleDirection = 1;
+        private float flinchTimer = 0f;
+        private Vector2 knockbackVelocity = Vector2.zero;
 
         public string GladiatorName => gladiatorName;
         public string CorporateSponsor => corporateSponsor;
@@ -135,7 +135,22 @@ namespace BeastClad.Arena
 
         private void FixedUpdate()
         {
-            if (currentState == GladiatorAIState.Inactive || currentState == GladiatorAIState.Defeated || currentState == GladiatorAIState.Telegraphing)
+            if (currentState == GladiatorAIState.Inactive || currentState == GladiatorAIState.Defeated)
+            {
+                SetVelocity(Vector2.zero);
+                return;
+            }
+
+            // Flinch hitstun interrupt
+            if (flinchTimer > 0f)
+            {
+                flinchTimer -= Time.fixedDeltaTime;
+                knockbackVelocity = Vector2.MoveTowards(knockbackVelocity, Vector2.zero, 25f * Time.fixedDeltaTime);
+                SetVelocity(knockbackVelocity);
+                return;
+            }
+
+            if (currentState == GladiatorAIState.Telegraphing)
             {
                 SetVelocity(Vector2.zero);
                 return;
@@ -297,11 +312,22 @@ namespace BeastClad.Arena
         {
             if (currentState == GladiatorAIState.Defeated) return;
 
+            if (currentHealth <= 0f) currentHealth = maxHealth;
+
             float effectiveDamage = Mathf.Max(1f, payload.rawDamage - defense);
+            bool isShielded = defense >= payload.rawDamage;
             currentHealth = Mathf.Clamp(currentHealth - effectiveDamage, 0f, maxHealth);
 
             Debug.Log($"<color=#FF5533>[Gladiator Hit]</color> {gladiatorName} received {effectiveDamage:F1} damage ({currentHealth:F1}/{maxHealth} HP).");
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
+
+            // Apply Flinch Hitstun & Knockback
+            flinchTimer = 0.16f;
+            if (payload.knockbackForce > 0.05f)
+            {
+                knockbackVelocity = payload.knockbackDirection.normalized * (payload.knockbackForce * 1.5f);
+                SetVelocity(knockbackVelocity);
+            }
 
             // Quick hit reaction flash
             if (spriteRenderer != null)
@@ -309,6 +335,15 @@ namespace BeastClad.Arena
                 spriteRenderer.color = Color.white;
                 Invoke(nameof(ResetVisualColor), 0.1f);
             }
+
+            // Centralized Impact Feedback (Damage Popups, Screen Shake, Hitstop)
+            CombatFeedbackManager.Instance?.TriggerHitFeedback(
+                transform.position,
+                payload,
+                effectiveDamage,
+                effectiveDamage >= 25f,
+                isShielded
+            );
 
             if (currentHealth <= 0f)
             {

@@ -56,6 +56,8 @@ namespace BeastClad.Underground
         private float attackTimer;
         private float stateTimer;
         private bool combatEnabled = false;
+        private float flinchTimer = 0f;
+        private Vector2 knockbackVelocity = Vector2.zero;
 
         private readonly Color defaultColor = new Color(0.85f, 0.25f, 0.25f, 1f); // Menacing rust crimson
         private readonly Color telegraphColor = new Color(1f, 0.85f, 0.1f, 1f); // Electric warning flash
@@ -147,7 +149,22 @@ namespace BeastClad.Underground
 
         private void FixedUpdate()
         {
-            if (!combatEnabled || currentState == PitBrawlerState.Inactive || currentState == PitBrawlerState.Defeated || currentState == PitBrawlerState.Telegraphing || currentState == PitBrawlerState.Recovery)
+            if (!combatEnabled || currentState == PitBrawlerState.Inactive || currentState == PitBrawlerState.Defeated)
+            {
+                SetVelocity(Vector2.zero);
+                return;
+            }
+
+            // Flinch hitstun interrupt
+            if (flinchTimer > 0f)
+            {
+                flinchTimer -= Time.fixedDeltaTime;
+                knockbackVelocity = Vector2.MoveTowards(knockbackVelocity, Vector2.zero, 25f * Time.fixedDeltaTime);
+                SetVelocity(knockbackVelocity);
+                return;
+            }
+
+            if (currentState == PitBrawlerState.Telegraphing || currentState == PitBrawlerState.Recovery)
             {
                 SetVelocity(Vector2.zero);
                 return;
@@ -318,12 +335,32 @@ namespace BeastClad.Underground
         {
             if (currentState == PitBrawlerState.Defeated) return;
 
+            if (currentHealth <= 0f) currentHealth = maxHealth;
+
             float effectiveDamage = Mathf.Max(1f, payload.rawDamage - defense);
+            bool isShielded = defense >= payload.rawDamage;
             currentHealth = Mathf.Clamp(currentHealth - effectiveDamage, 0f, maxHealth);
 
             OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
+            // Apply Flinch Hitstun & Knockback
+            flinchTimer = 0.16f;
+            if (payload.knockbackForce > 0.05f)
+            {
+                knockbackVelocity = payload.knockbackDirection.normalized * (payload.knockbackForce * 1.5f);
+                SetVelocity(knockbackVelocity);
+            }
+
             StartCoroutine(FlashDamageRoutine());
+
+            // Centralized Impact Feedback (Damage Popups, Screen Shake, Hitstop)
+            Combat.CombatFeedbackManager.Instance?.TriggerHitFeedback(
+                transform.position,
+                payload,
+                effectiveDamage,
+                effectiveDamage >= 25f,
+                isShielded
+            );
 
             if (currentHealth <= 0f)
             {

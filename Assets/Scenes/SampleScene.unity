@@ -1238,6 +1238,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
+  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1363,6 +1364,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbfe472efe70c634ab8d4cdb6f07e607, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeastClad.World.CameraFollow2D
+  target: {fileID: 0}
+  smoothSpeed: 6
+  offset: {x: 0, y: 0, z: -10}
+  useBounds: 1
+  minBounds: {x: -6, y: -3}
+  maxBounds: {x: 6, y: 3}
+  maxShakeOffset: 0.45
+  traumaDecay: 1.75
+  shakeFrequency: 28
 --- !u!1 &542401430
 GameObject:
   m_ObjectHideFlags: 0

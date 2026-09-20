@@ -139,6 +139,9 @@ namespace BeastClad.Combat
 
             Debug.Log("<color=#FFD700>[Terraforming Reaction]</color> <b>ELECTRO-CONDUCTIVE DISCHARGE!</b> Water Puddle electrified into an <b>AoE Shock Zone</b>!");
 
+            CombatFeedbackManager.Instance?.TriggerScreenShake(0.35f);
+            CombatFeedbackManager.Instance?.TriggerHitstop(0.06f);
+
             // Immediate initial shock burst to all targets inside
             ExecuteShockTick();
         }

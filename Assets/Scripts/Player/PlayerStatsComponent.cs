@@ -39,8 +39,14 @@ namespace BeastClad.Player
             cachedHurtbox = GetComponent<Hurtbox2D>();
         }
 
+        private void Start()
+        {
+            if (CurrentHP <= 0f) CurrentHP = MaxHP;
+        }
+
         private void OnEnable()
         {
+            if (cachedHurtbox == null) cachedHurtbox = GetComponent<Hurtbox2D>();
             if (cachedHurtbox != null)
             {
                 cachedHurtbox.OnHitReceived += HandleHitReceived;
@@ -57,7 +63,35 @@ namespace BeastClad.Player
 
         private void HandleHitReceived(DamagePayload payload)
         {
+            if (CurrentHP <= 0f) CurrentHP = MaxHP;
+
+            float effectiveDamage = Mathf.Max(1f, payload.rawDamage - Defense);
+            bool isShielded = Defense >= payload.rawDamage;
+
+            // Apply pushback impulse to player
+            var pc = GetComponent<PlayerController2D>();
+            if (pc != null && payload.knockbackForce > 0.05f)
+            {
+                pc.ApplyKnockbackImpulse(payload.knockbackDirection, payload.knockbackForce * 0.75f);
+            }
+
+            // Flash paperdoll visually
+            var visual = GetComponent<PlayerInfuseVisualController>();
+            if (visual != null)
+            {
+                visual.FlashAllOverlays(new Color(1f, 0.35f, 0.35f, 1f), 0.12f);
+            }
+
             TakeDamage(payload.rawDamage);
+
+            // Trigger hit feedback (camera shake, hitstop, damage popup)
+            Combat.CombatFeedbackManager.Instance?.TriggerHitFeedback(
+                transform.position,
+                payload,
+                effectiveDamage,
+                false,
+                isShielded
+            );
         }
 
         /// <summary>
@@ -99,10 +133,26 @@ namespace BeastClad.Player
         /// </summary>
         public void TakeTrueDamage(float damage)
         {
-            if (CurrentHP <= 0f || damage <= 0f) return;
+            if (damage <= 0f) return;
+            if (CurrentHP <= 0f) CurrentHP = MaxHP;
 
             CurrentHP = Mathf.Clamp(CurrentHP - damage, 0f, MaxHP);
             OnHealthChanged?.Invoke(CurrentHP, MaxHP);
+
+            var visual = GetComponent<PlayerInfuseVisualController>();
+            if (visual != null)
+            {
+                visual.FlashAllOverlays(new Color(1f, 0.15f, 0.25f, 1f), 0.08f);
+            }
+
+            Combat.CombatFeedbackManager.Instance?.SpawnDamagePopup(
+                transform.position,
+                $"-{damage:F0} BIO-STRESS",
+                new Color(1f, 0.2f, 0.35f, 1f),
+                true,
+                false
+            );
+            Combat.CombatFeedbackManager.Instance?.TriggerScreenShake(0.20f);
 
             if (CurrentHP <= 0f)
             {

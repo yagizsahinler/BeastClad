@@ -69,6 +69,15 @@ namespace BeastClad.Combat
             {
                 rb.AddForce(payload.knockbackDirection * payload.knockbackForce, ForceMode2D.Impulse);
             }
+
+            // Centralized Impact Feedback (Floating Numbers, Screen Shake, Hitstop)
+            CombatFeedbackManager.Instance?.TriggerHitFeedback(
+                transform.position,
+                payload,
+                payload.rawDamage,
+                payload.rawDamage >= 25f,
+                false
+            );
         }
 
         private IEnumerator FlashColorRoutine(Color flashCol)

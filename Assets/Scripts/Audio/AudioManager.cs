@@ -48,6 +48,8 @@ namespace BeastClad.Audio
         private AudioClip syntheticEquipBeep;
         private AudioClip syntheticHitBeep;
         private AudioClip syntheticCooldownBeep;
+        private AudioClip syntheticCritBeep;
+        private AudioClip syntheticGuardBeep;
 
         public float MasterVolume => masterVolume;
         public float SFXVolume => sfxVolume;
@@ -220,6 +222,26 @@ namespace BeastClad.Audio
             }
         }
 
+        public void PlaySyntheticCritCue()
+        {
+            if (syntheticCritBeep != null)
+            {
+                PlaySFX(syntheticCritBeep, 0.95f, 0.05f);
+            }
+            else
+            {
+                PlaySyntheticHitCue();
+            }
+        }
+
+        public void PlaySyntheticGuardCue()
+        {
+            if (syntheticGuardBeep != null)
+            {
+                PlaySFX(syntheticGuardBeep, 0.75f, 0.04f);
+            }
+        }
+
         private void CreateSyntheticFallbackClips()
         {
             // Equip snap (chirp)
@@ -228,6 +250,10 @@ namespace BeastClad.Audio
             syntheticHitBeep = GenerateProceduralTone("SyntheticHit", 180, 80, 0.12f);
             // Cooldown ready chime
             syntheticCooldownBeep = GenerateProceduralTone("SyntheticReady", 660, 990, 0.1f);
+            // Heavy crit crunch (explosive low-to-punch tone)
+            syntheticCritBeep = GenerateProceduralTone("SyntheticCrit", 320, 90, 0.18f);
+            // Deflection / guard metallic ping
+            syntheticGuardBeep = GenerateProceduralTone("SyntheticGuard", 800, 400, 0.09f);
         }
 
         private AudioClip GenerateProceduralTone(string name, float startFreq, float endFreq, float duration)

@@ -48,6 +48,8 @@ namespace BeastClad.Player
         private float dashTimeRemaining;
         private bool wasCooldownActive;
         private bool isMovementLocked = false;
+        private Vector2 externalKnockbackVelocity = Vector2.zero;
+        private float knockbackDecay = 24f;
 
         // Public Properties for HUD / Combat Systems
         public bool IsMovementLocked => isMovementLocked;
@@ -248,7 +250,31 @@ namespace BeastClad.Player
             float rate = targetInput.sqrMagnitude > 0.01f ? acceleration : deceleration;
 
             currentVelocity = Vector2.MoveTowards(currentVelocity, targetVelocity, rate * Time.fixedDeltaTime);
-            SetVelocity(currentVelocity);
+
+            if (externalKnockbackVelocity.sqrMagnitude > 0.01f)
+            {
+                externalKnockbackVelocity = Vector2.MoveTowards(externalKnockbackVelocity, Vector2.zero, knockbackDecay * Time.fixedDeltaTime);
+            }
+            else
+            {
+                externalKnockbackVelocity = Vector2.zero;
+            }
+
+            SetVelocity(currentVelocity + externalKnockbackVelocity);
+        }
+
+        /// <summary>
+        /// Applies an external directional knockback impulse without locking player movement input.
+        /// </summary>
+        public void ApplyKnockbackImpulse(Vector2 direction, float force)
+        {
+            if (direction.sqrMagnitude < 0.01f || force <= 0f) return;
+            externalKnockbackVelocity += direction.normalized * force;
+            // Cap maximum impulse to prevent clipping
+            if (externalKnockbackVelocity.magnitude > 25f)
+            {
+                externalKnockbackVelocity = externalKnockbackVelocity.normalized * 25f;
+            }
         }
 
         /// <summary>

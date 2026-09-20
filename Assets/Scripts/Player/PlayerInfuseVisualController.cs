@@ -173,6 +173,38 @@ namespace BeastClad.Player
         }
 
         /// <summary>
+        /// Flashes the base chassis and all active paperdoll overlay renderers simultaneously.
+        /// Used for hit reactions, bio-recoil damage, and hazard impacts.
+        /// </summary>
+        public void FlashAllOverlays(Color flashColor, float duration = 0.1f)
+        {
+            StartCoroutine(FlashAllRoutine(flashColor, duration));
+        }
+
+        private System.Collections.IEnumerator FlashAllRoutine(Color flashColor, float duration)
+        {
+            var renderers = new List<SpriteRenderer>();
+            if (baseChassisRenderer != null) renderers.Add(baseChassisRenderer);
+            if (headOverlayRenderer != null && headOverlayRenderer.enabled) renderers.Add(headOverlayRenderer);
+            if (chestOverlayRenderer != null && chestOverlayRenderer.enabled) renderers.Add(chestOverlayRenderer);
+            if (leftArmOverlayRenderer != null && leftArmOverlayRenderer.enabled) renderers.Add(leftArmOverlayRenderer);
+            if (rightArmOverlayRenderer != null && rightArmOverlayRenderer.enabled) renderers.Add(rightArmOverlayRenderer);
+            if (legsOverlayRenderer != null && legsOverlayRenderer.enabled) renderers.Add(legsOverlayRenderer);
+
+            foreach (var r in renderers)
+            {
+                if (r != null) r.color = flashColor;
+            }
+
+            yield return new WaitForSeconds(duration);
+
+            foreach (var r in renderers)
+            {
+                if (r != null) r.color = Color.white;
+            }
+        }
+
+        /// <summary>
         /// Updates the directional sprite representations and flips across all 5 slots.
         /// </summary>
         public void UpdateDirectionalOverlays(Vector2 facingDir)

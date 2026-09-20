@@ -267,6 +267,13 @@ namespace BeastClad.Trapping
         private void HandleHitReceived(DamagePayload payload)
         {
             Debug.Log($"<color=#FFAA00>[Wild Beast]</color> {SpeciesName} weakened by {payload.rawDamage:F1} {payload.element?.displayName} strike!");
+            Combat.CombatFeedbackManager.Instance?.TriggerHitFeedback(
+                transform.position,
+                payload,
+                payload.rawDamage,
+                payload.rawDamage >= 25f,
+                false
+            );
         }
 
         #endregion

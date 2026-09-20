@@ -69,4 +69,8 @@
 - **Issue:** When a `VerticalLayoutGroup` has `childControlHeight = true`, it dynamically overrides the child RectTransform height with the child's `ILayoutElement.preferredHeight`. If child buttons lack an explicit `LayoutElement` component (with `minHeight` / `preferredHeight`), Unity falls back to default sprite minimums (10px). A 10px tall button squashes child `Text` components below their line height, triggering `VerticalWrapMode.Truncate` and rendering button labels completely invisible.
 - **Pattern:** For menus inside Layout Groups, always set `vlg.childControlHeight = false` or attach an explicit `LayoutElement` with `minHeight = desiredHeight` and `preferredHeight = desiredHeight` to every child button. Furthermore, always set `txt.verticalOverflow = VerticalWrapMode.Overflow;` and `txt.horizontalOverflow = HorizontalWrapMode.Overflow;` on menu button labels so text can never be silently truncated by layout fluctuations.
 
+## 18. `Time.timeScale` Modification Outside Play Mode
+- **Issue:** Setting `Time.timeScale` in edit-mode tests or MCP scripts modifies and dirties `ProjectSettings/TimeManager.asset`, persisting unintended slow-motion timescale into the project configuration.
+- **Pattern:** Always guard `Time.timeScale` alterations with `if (!Application.isPlaying) return;` so editor-time tests and dynamic execution never alter project-level time settings.
+
 
